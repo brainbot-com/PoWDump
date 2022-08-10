@@ -1,7 +1,13 @@
 {
-  "rinkeby": {
-    "Lock": {
-      "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3"
+  "pow": {
+    "EtherSwap": {
+      "address": "0x5FbDB2315678afecb367f032d93F642f64180aa3"
+    }
+  },
+  "pos": {
+    "EtherSwap": {
+      "address": "0x6a42Ec84e3E5adBDdB3236D83059A7b9BFc7DD5d",
+      "startBlock": 7379055
     }
   }
 }

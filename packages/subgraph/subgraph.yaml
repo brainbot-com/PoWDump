@@ -4,10 +4,10 @@ schema:
 dataSources:
   - kind: ethereum
     name: EtherSwap
-    network: rinkeby
+    network: pow
     source:
-      address: "0x5fbdb2315678afecb367f032d93f642f64180aa3"
       abi: EtherSwap
+      address: "0x5FbDB2315678afecb367f032d93F642f64180aa3"
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.5
@@ -18,10 +18,13 @@ dataSources:
         - name: EtherSwap
           file: ../contracts/artifacts/contracts/EtherSwap.sol/EtherSwap.json
       eventHandlers:
-        - event: SwapInitiatedEvent(indexed bytes32,uint256)
+        - event: SwapInitiatedEvent(indexed
+            bytes32,address,address,uint256,uint256,uint64)
           handler: handleSwapInitiatedEvent
-        - event: SwapSuccessEvent(indexed bytes32,uint256)
+        - event: SwapSuccessEvent(indexed bytes32,address,uint256,address)
           handler: handleSwapSuccessEvent
-        - event: SwapExpiredEvent(indexed bytes32)
-          handler: handleSwapExpiredEvent
+        - event: SwapRefundedEvent(indexed bytes32)
+          handler: handleSwapRefundedEvent
+        - event: SwapRecipientAddedEvent(indexed bytes32,address)
+          handler: handleSwapRecipientAddedEvent
       file: ./src/EtherSwap.ts

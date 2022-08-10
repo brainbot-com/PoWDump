@@ -1,14 +1,22 @@
 {
-  "name": "subgraph",
+  "name": "@project/dump-pow-subgraph",
   "version": "0.0.1",
   "license": "UNLICENSED",
   "scripts": {
     "codegen": "graph codegen",
-    "build": "graph build",
+    "build-pow": "graph build --network pow",
+    "build-pos": "graph build --network pos",
+    "graph-local": "docker-compose up",
+    "graph-local-clean": "docker-compose down -v && docker-compose rm -v && rm -rf data/ipfs data/postgres",
     "deploy": "graph deploy --node https://api.studio.thegraph.com/deploy/ dump-pow",
-    "create-local": "graph create --node http://localhost:8020/ dump-pow",
-    "remove-local": "graph remove --node http://localhost:8020/ dump-pow",
-    "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 dump-pow"
+    "create-local-pow": "graph create --node http://localhost:8020/ dump-pow --network pow",
+    "remove-local-pow": "graph remove --node http://localhost:8020/ dump-pow --network pow",
+    "deploy-local-pow": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 dump-pow --network pow",
+    "create-local-pos": "graph create --node http://localhost:8020/ dump-pow-pos --network pow",
+    "remove-local-pos": "graph remove --node http://localhost:8020/ dump-pow-pos --network pos",
+    "deploy-local-pos": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 dump-pow-pos --network pos",
+    "build-create-deploy-pow": "yarn build-pow && yarn create-local-pow && yarn deploy-local-pow",
+    "build-create-deploy-pos": "yarn build-pos && yarn create-local-pos && yarn deploy-local-pos"
   },
   "dependencies": {
     "@graphprotocol/graph-cli": "0.31.0",

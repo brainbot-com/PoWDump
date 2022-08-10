@@ -1,6 +1,11 @@
-type ExampleEntity @entity {
+type SwapCommitment @entity {
   id: ID!
-  count: BigInt!
-  amount: BigInt! # uint256
-  when: BigInt! # uint256
+  hashedSecret: Bytes!
+  initiator: Bytes!
+  recipient: Bytes!
+  endTimeStamp: BigInt!
+  value: BigInt!
+  expectedAmount: BigInt!
+  emptied: Boolean!
+  refunded: Boolean!
 }
