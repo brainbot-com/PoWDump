@@ -11,3 +11,8 @@ artifacts
 
 yarn-error.log
 lerna-debug.log
+
+# Subgraph files
+/packages/subgraph/data
+/packages/subgraph/build
+/packages/subgraph/generated

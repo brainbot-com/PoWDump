@@ -1,13 +1,5 @@
-# Sample Hardhat Project
+# @project/dump-pow-contracts
 
-This project demonstrates a basic Hardhat use case. It comes with a sample contract, a test for that contract, and a script that deploys that contract.
+This package contains the dumpPOW smart contract and its ABI. The package is created with hardhat.
 
-Try running some of the following tasks:
-
-```shell
-npx hardhat help
-npx hardhat test
-GAS_REPORT=true npx hardhat test
-npx hardhat node
-npx hardhat run scripts/deploy.ts
-```
+To properly setup the package create a `.env` file and fill it with the variables from the `.env.example` file.
