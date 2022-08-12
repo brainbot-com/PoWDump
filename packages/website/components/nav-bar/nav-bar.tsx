@@ -1,17 +1,20 @@
 import React from "react";
 
-import { NavBarSwitchButtonBar } from "../nav-bar-switch-button-bar";
 import { ConnectETHWalletButton } from "../connect-eth-wallet-button";
+import NetworksDropdown from "../networks-dropdown/networks-dropdown";
 
 function NavBar() {
   return (
-    <nav className="bg-white shadow-sm">
+    <nav>
       <div className="container mx-auto h-20 flex flex-row items-center justify-between">
-        <div className="font-semibold flex-1">Dump that!</div>
-        <div className="flex-1 flex justify-center">
-          <NavBarSwitchButtonBar />
-        </div>
-        <div className="flex-1 flex justify-end">
+        <div className="font-semibold flex-1 text-white">POWDump</div>
+
+        <div className="flex-1 flex justify-end items-center">
+            <div className={"mr-3"}>
+
+                <NetworksDropdown />
+            </div>
+
           <ConnectETHWalletButton />
         </div>
       </div>

@@ -1,8 +1,8 @@
 import type { NextPage } from 'next'
-import { CommitBox } from "../components/commit-box";
 
 import { useStore } from "../store";
 import Layout from "../components/layout";
+import {DumpBox} from "../components/dump-box";
 
 const Home: NextPage = () => {
   const activeNavBarSwitchItem = useStore(
@@ -17,7 +17,7 @@ const Home: NextPage = () => {
 
   return (
     <Layout title={'Create Next App'}>
-        <CommitBox />
+        <DumpBox />
     </Layout>
 
   )

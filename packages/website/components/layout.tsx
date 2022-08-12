@@ -11,14 +11,14 @@ export default function Layout({title, children}: Props) {
 
 
     return (
-        <div className={styles.container}>
+        <div className={""}>
             <Head>
                 <title>{title}</title>
                 <meta name="description" content="Dump that tokens!" />
                 <link rel="icon" href="/favicon.ico" />
             </Head>
 
-            <main className={styles.main}>
+            <main className={"max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"}>
                 <NavBar />
                 {children}
             </main>
