@@ -1,14 +1,12 @@
-import React from "react";
+import React from 'react'
 
-import { ClaimBoxSwitchButtonBar } from "../claim-box-switch-button-bar";
-import { ClaimBoxEth } from "../claim-box-eth";
+import { ClaimBoxSwitchButtonBar } from '../claim-box-switch-button-bar'
+import { ClaimBoxEth } from '../claim-box-eth'
 
-import { useStore } from "../../store";
+import { useStore } from '../../store'
 
 function ClaimBox() {
-  const activeClaimBoxSwitchItem = useStore(
-    (state) => state.activeClaimBoxSwitchItem
-  );
+  const activeClaimBoxSwitchItem = useStore(state => state.activeClaimBoxSwitchItem)
 
   return (
     <div className="container mx-auto">
@@ -20,10 +18,10 @@ function ClaimBox() {
       >
         <ClaimBoxSwitchButtonBar />
         {/*{activeClaimBoxSwitchItem === "TL" ? <ClaimBoxTl /> : <ClaimBoxEth />}*/}
-          <ClaimBoxEth />
+        <ClaimBoxEth />
       </div>
     </div>
-  );
+  )
 }
 
-export { ClaimBox };
+export { ClaimBox }

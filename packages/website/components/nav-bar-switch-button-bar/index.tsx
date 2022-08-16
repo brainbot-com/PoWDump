@@ -1,1 +1,1 @@
-export * from "./nav-bar-switch-button-bar";
+export * from './nav-bar-switch-button-bar'

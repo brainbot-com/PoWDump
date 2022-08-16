@@ -1,1 +1,1 @@
-export * from "./commit-box";
+export * from './commit-box'

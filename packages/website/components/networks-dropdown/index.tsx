@@ -1,1 +1,1 @@
-export * from "./networks-dropdown";
+export * from './networks-dropdown'

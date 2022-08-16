@@ -1,1 +1,1 @@
-export * from "./qr-code-scanner-modal";
+export * from './qr-code-scanner-modal'

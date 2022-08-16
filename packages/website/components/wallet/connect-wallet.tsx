@@ -1,42 +1,34 @@
-import { Fragment, useEffect, useState } from "react";
-import { Dialog, Transition } from "@headlessui/react";
-import { XIcon } from "@heroicons/react/outline";
-import { useWeb3React } from "@web3-react/core";
-import { Web3Provider } from "@ethersproject/providers";
-import { supportedWallets, supportedWalletTypes } from "../../constants";
+import { Fragment, useEffect, useState } from 'react'
+import { Dialog, Transition } from '@headlessui/react'
+import { XIcon } from '@heroicons/react/outline'
+import { useWeb3React } from '@web3-react/core'
+import { Web3Provider } from '@ethersproject/providers'
+import { supportedWallets, supportedWalletTypes } from '../../constants'
 
 export function ConnectWallet() {
-  let [isOpen, setIsOpen] = useState(false);
-  const [
-    connectedWallet,
-    setConnectedWallet
-  ] = useState<null | supportedWalletTypes>(null);
-  const [isConnected, setIsConnected] = useState(false);
-  const { account } = useWeb3React<Web3Provider>();
+  let [isOpen, setIsOpen] = useState(false)
+  const [connectedWallet, setConnectedWallet] = useState<null | supportedWalletTypes>(null)
+  const [isConnected, setIsConnected] = useState(false)
+  const { account } = useWeb3React<Web3Provider>()
 
   function closeModal() {
-    setIsOpen(false);
+    setIsOpen(false)
   }
 
   function openModal() {
-    setIsOpen(true);
+    setIsOpen(true)
   }
 
   useEffect(() => {
-    const isWalletConnected = !!localStorage.getItem("isWalletConnected");
-    const connectedWallet = localStorage.getItem(
-      "connectedWallet"
-    ) as supportedWalletTypes;
-    setIsConnected(isWalletConnected);
-    setConnectedWallet(connectedWallet);
-  }, []);
+    const isWalletConnected = !!localStorage.getItem('isWalletConnected')
+    const connectedWallet = localStorage.getItem('connectedWallet') as supportedWalletTypes
+    setIsConnected(isWalletConnected)
+    setConnectedWallet(connectedWallet)
+  }, [])
 
   return (
     <>
-      {isConnected &&
-      account &&
-      connectedWallet &&
-      supportedWallets[connectedWallet] ? (
+      {isConnected && account && connectedWallet && supportedWallets[connectedWallet] ? (
         supportedWallets[connectedWallet].connector
       ) : (
         <>
@@ -73,7 +65,7 @@ export function ConnectWallet() {
                     leaveTo="opacity-0 scale-95"
                   >
                     <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-gray-800 p-6 text-left align-middle shadow-xl transition-all">
-                      <div className={"pb-4 flex items-center"}>
+                      <div className={'pb-4 flex items-center'}>
                         <div className="hidden sm:block absolute top-0 right-0 pt-5 pr-5">
                           <button
                             type="button"
@@ -84,17 +76,14 @@ export function ConnectWallet() {
                             <XIcon className="h-6 w-6" aria-hidden="true" />
                           </button>
                         </div>
-                        <Dialog.Title
-                          as="h3"
-                          className="text-lg font-medium leading-6 text-gray-900 dark:text-white"
-                        >
+                        <Dialog.Title as="h3" className="text-lg font-medium leading-6 text-gray-900 dark:text-white">
                           Connect Wallet
                         </Dialog.Title>
                       </div>
 
-                      <div className={"flex flex-col space-y-4"}>
+                      <div className={'flex flex-col space-y-4'}>
                         {Object.values(supportedWallets).map(wallet => {
-                          return <>{wallet.connector}</>;
+                          return <>{wallet.connector}</>
                         })}
                       </div>
                     </Dialog.Panel>
@@ -106,5 +95,5 @@ export function ConnectWallet() {
         </>
       )}
     </>
-  );
+  )
 }

@@ -24,8 +24,13 @@ const errorsTranslations = {
   [NO_POS_AMOUNT_ENTERED as string]: 'Enter expected PoS amount',
 }
 
-const validateForm = ({ library, ethPoWAmount, ethPoSAmount, claimPeriodInSec }) => {
-  console.log('validate form', ethPoWAmount)
+type Props = {
+  library: Web3Provider | undefined
+  ethPoWAmount: string
+  ethPoSAmount: string
+  claimPeriodInSec: number
+}
+const validateForm = ({ library, ethPoWAmount, ethPoSAmount, claimPeriodInSec }: Props) => {
   if (!library?.provider) {
     throw new Error(NO_WALLET_CONNECTED)
   }
@@ -38,7 +43,7 @@ const validateForm = ({ library, ethPoWAmount, ethPoSAmount, claimPeriodInSec })
     throw new Error(NO_POS_AMOUNT_ENTERED)
   }
 
-  if(claimPeriodInSec === '') {
+  if (!claimPeriodInSec) {
     throw new Error(NO_CLAIM_PERIOD_ENTERED)
   }
 }
@@ -71,7 +76,6 @@ function DumpBox() {
       })
 
       setError('')
-
     } catch (e) {
       if (e instanceof Error) {
         setError(e.message)
@@ -112,7 +116,6 @@ function DumpBox() {
 
       const shareLink = `${process.env.PUBLIC_URL}/commit?hashed-secret=${hashedSecret}`
       setShareLink(shareLink)
-
     } catch (error) {
       console.log(error)
     } finally {

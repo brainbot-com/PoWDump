@@ -1,3 +1,3 @@
-import {default as Home} from "../pages/index";
+import { default as Home } from '../pages/index'
 
 export default Home

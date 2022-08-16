@@ -1,1 +1,1 @@
-export * from "./claim-box-eth";
+export * from './claim-box-eth'

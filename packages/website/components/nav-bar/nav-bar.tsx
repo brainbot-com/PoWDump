@@ -1,7 +1,7 @@
-import React from "react";
+import React from 'react'
 
-import NetworksDropdown from "../networks-dropdown/networks-dropdown";
-import { ConnectWallet } from "../wallet/connect-wallet";
+import NetworksDropdown from '../networks-dropdown/networks-dropdown'
+import { ConnectWallet } from '../wallet/connect-wallet'
 
 function NavBar() {
   return (
@@ -10,7 +10,7 @@ function NavBar() {
         <div className="font-semibold text-white">POWDump</div>
 
         <div className="flex-1 flex justify-end items-center">
-          <div className={"mr-3"}>
+          <div className={'mr-3'}>
             <NetworksDropdown />
           </div>
 
@@ -18,7 +18,7 @@ function NavBar() {
         </div>
       </div>
     </nav>
-  );
+  )
 }
 
-export { NavBar };
+export { NavBar }
