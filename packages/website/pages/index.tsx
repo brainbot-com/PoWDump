@@ -3,17 +3,28 @@ import type { NextPage } from 'next'
 import { useStore } from "../store";
 import Layout from "../components/layout";
 import {DumpBox} from "../components/dump-box";
+import {injected} from "../utils/connectors";
+import {useWeb3React} from "@web3-react/core";
+import {useEffect} from "react";
 
 const Home: NextPage = () => {
-  const activeNavBarSwitchItem = useStore(
-      (state) => state.activeNavBarSwitchItem
-  );
-  const setActiveNavBarSwitchItem = useStore(
-      (state) => state.setActiveNavBarSwitchItem
-  );
-  const setActiveCommitBoxSwitchItem = useStore(
-      (state) => state.setActiveCommitBoxSwitchItem
-  );
+  const { active, account, library, connector, activate, deactivate } = useWeb3React()
+
+
+  useEffect(() => {
+    const connectWalletOnPageLoad = async () => {
+      if (localStorage?.getItem('isWalletConnected') === 'true') {
+        try {
+          await activate(injected)
+          localStorage.setItem('isWalletConnected', "true")
+        } catch (ex) {
+          console.log(ex)
+        }
+      }
+    }
+    connectWalletOnPageLoad()
+  }, [])
+
 
   return (
     <Layout title={'Create Next App'}>

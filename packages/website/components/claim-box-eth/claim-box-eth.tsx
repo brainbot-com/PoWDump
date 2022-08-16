@@ -1,19 +1,15 @@
 import React, {useEffect, Fragment, useState} from "react";
 
-import {LabeledInput} from "../labeled-input";
-import {ConnectETHWalletButton} from "../connect-eth-wallet-button";
-import {Button} from "../button";
-
-import useWeb3Modal from "../../hooks/useWeb3Modal";
 import {addRecipient, claim} from "../../utils/eth-swap";
 import {getCommitment} from "../../api/local-storage";
 import {useStore} from "../../store";
 import {request, gql, GraphQLWebSocketClient} from 'graphql-request'
-import config from "../../config";
 import {Dialog, Transition} from '@headlessui/react'
 import {CheckIcon} from '@heroicons/react/outline'
 
 import { GRAPHQL_TRANSPORT_WS_PROTOCOL } from 'graphql-ws';
+import {Web3Provider} from "@ethersproject/providers";
+import {useWeb3React} from "@web3-react/core";
 
 
 type commitment = {
@@ -63,8 +59,9 @@ function ClaimBoxEth() {
     const [open, setOpen] = useState(false)
     const [matchCommitment, setMatchCommitment] = useState<null | commitment>(null)
 
-    const {provider} = useWeb3Modal({autoLoad: true});
+    const {library} = useWeb3React<Web3Provider>()
 
+    const provider = library.provider
     const connectedETHAddress = useStore((state) => state.connectedETHAddress);
     const [openSwapCommitments, setOpenSwapCommitments] = React.useState([]);
     useEffect(() => {
