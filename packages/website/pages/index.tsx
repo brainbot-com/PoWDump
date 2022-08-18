@@ -6,7 +6,7 @@ import {DumpBox} from "../components/dump-box";
 const Home: NextPage = () => {
 
     return (
-        <Layout title={'Create Next App'}>
+        <Layout title={'PoWDump'}>
             <DumpBox/>
         </Layout>
 
