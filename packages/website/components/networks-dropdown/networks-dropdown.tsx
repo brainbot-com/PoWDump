@@ -4,13 +4,33 @@ import { Popover, Transition } from '@headlessui/react'
 import { ChevronDownIcon } from '@heroicons/react/solid'
 import Image from 'next/image'
 import { classNames } from '../../utils/tailwind'
-import { networks } from '../../constants'
+import { switchChain } from '../../utils/switchChain'
+import { useWeb3React } from '@web3-react/core'
+import { ALL_SUPPORTED_CHAIN_IDS } from '../../constants/chains'
+import { getChainInfo } from '../../constants/chainInfo'
+import { useStore } from '../../store'
+import { getErrorMessage } from '../../utils/error'
 
 export default function NetworksDropdown() {
-  const [selectedNetwork, setSelectedNetwork] = useState('mainnet')
+  const [selectedNetwork, setSelectedNetwork] = useState(getChainInfo(1))
+  const { connector } = useWeb3React()
+  const setNotification = useStore(state => state.setNotification)
+
+  const switchNetwork = async (id: number) => {
+    try {
+      const selectedChainInfo = getChainInfo(id)
+      await switchChain(connector, id)
+      setSelectedNetwork(selectedChainInfo)
+    } catch (e) {
+      const message = getErrorMessage(e)
+      console.log('error switching chain', e)
+      setNotification({ type: 'error', title: 'Error switching chain', description: message })
+    }
+  }
+
   return (
     <Popover className="relative">
-      {({ open }) => (
+      {({ open, close }) => (
         <>
           <Popover.Button
             className={classNames(
@@ -21,8 +41,8 @@ export default function NetworksDropdown() {
               'p-2'
             )}
           >
-            <Image src={networks[selectedNetwork].icon} width={20} height={20} />
-            <span className={'ml-1'}>{networks[selectedNetwork].name}</span>
+            {selectedNetwork && <Image src={selectedNetwork.logoUrl} width={20} height={20} />}
+            {selectedNetwork && <span className={'ml-1'}>{selectedNetwork.nativeCurrency.name}</span>}
             <ChevronDownIcon
               className={classNames(open ? 'text-gray-600' : 'text-gray-400', 'ml-2 h-5 w-5 group-hover:text-gray-500')}
               aria-hidden="true"
@@ -42,17 +62,24 @@ export default function NetworksDropdown() {
               <div className="rounded-lg shadow-lg ring-1 ring-black ring-opacity-5 overflow-hidden border border-zinc-700">
                 <div className="relative grid gap-6 bg-zinc-900 px-5 py-6 sm:gap-8 sm:p-8 text-white">
                   Select a network
-                  {Object.values(networks).map(item => (
-                    <span
-                      key={item.name}
-                      className="-m-3 p-3 block rounded-md hover:bg-zinc-800 transition
+                  {ALL_SUPPORTED_CHAIN_IDS.map(chainId => {
+                    const chainInfo = getChainInfo(chainId)
+                    return (
+                      <span
+                        key={chainId}
+                        className="-m-3 p-3 block rounded-md hover:bg-zinc-800 transition
                                             text-base font-medium text-white
                                             cursor-pointer
                                             ease-in-out duration-150"
-                    >
-                      {item.name}
-                    </span>
-                  ))}
+                        onClick={async () => {
+                          close()
+                          await switchNetwork(chainId)
+                        }}
+                      >
+                        {chainInfo.nativeCurrency.name}
+                      </span>
+                    )
+                  })}
                 </div>
               </div>
             </Popover.Panel>

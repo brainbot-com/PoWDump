@@ -6,15 +6,15 @@ import { BigNumber } from '@ethersproject/bignumber'
 export function useEthBalance() {
   const [balance, setBalance] = useState(BigNumber.from(0))
 
-  const { account, library } = useWeb3React<Web3Provider>()
+  const { account, provider } = useWeb3React<Web3Provider>()
 
   useEffect(() => {
-    if (library && account) {
-      library.getBalance(account).then(result => {
+    if (provider && account) {
+      provider.getBalance(account).then(result => {
         setBalance(result)
       })
     }
-  }, [library, account])
+  }, [provider, account])
 
   return { balance }
 }

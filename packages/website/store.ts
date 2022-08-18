@@ -7,6 +7,11 @@ export type ethPoS = 'ethPoS'
 export type ActiveCommitBoxSwitchItem = ethPoW | ethPoS
 export type ActiveClaimBoxSwitchItem = ethPoW | ethPoS
 
+export type NotificationType = {
+  type: 'error' | 'success' | 'info' | 'warning',
+  title: string,
+  description: string,
+}
 type Store = {
   connectedETHAddress: null | string
   setConnectedETHAddress: (newConnectedETHAddress: null | string) => void
@@ -15,7 +20,9 @@ type Store = {
   activeCommitBoxSwitchItem: ActiveCommitBoxSwitchItem
   setActiveCommitBoxSwitchItem: (newActiveCommitBoxSwitchItem: ActiveCommitBoxSwitchItem) => void
   activeClaimBoxSwitchItem: ActiveClaimBoxSwitchItem
-  setActiveClaimBoxSwitchItem: (newActiveClaimBoxSwitchItem: ActiveClaimBoxSwitchItem) => void
+  setActiveClaimBoxSwitchItem: (newActiveClaimBoxSwitchItem: ActiveClaimBoxSwitchItem) => void,
+  notification: NotificationType | null,
+  setNotification: (newErrorForNotification: NotificationType) => void
 }
 
 export const useStore = create<Store>(set => ({
@@ -31,4 +38,6 @@ export const useStore = create<Store>(set => ({
   activeClaimBoxSwitchItem: 'ethPoW',
   setActiveClaimBoxSwitchItem: (newActiveClaimBoxSwitchItem: ActiveClaimBoxSwitchItem) =>
     set({ activeClaimBoxSwitchItem: newActiveClaimBoxSwitchItem }),
+  notification: null,
+  setNotification: (newErrorForNotification: NotificationType) => set({ notification: newErrorForNotification })
 }))

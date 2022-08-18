@@ -1,17 +1,17 @@
 import Image from 'next/image'
 
 type Props = {
-  key: string
+  connectorKey: string
   onClick: (key: string) => void
   title: string
   icon: string
 }
 
-export const ConnectorButton = ({ key, onClick, title, icon }: Props) => {
+export const ConnectorButton = ({ connectorKey, onClick, title, icon }: Props) => {
   return (
-    <div key={key} className={'flex flex-col space-y-4'}>
+    <div key={connectorKey} className={'flex flex-col space-y-4'}>
       <button
-        onClick={() => onClick(key)}
+        onClick={() => onClick(connectorKey)}
         className={
           'bg-gray-900 text-white border border-transparent shrink-0 inline-flex' +
           ' items-center justify-center disabled:opacity-50 disabled:cursor-default ' +

@@ -13,6 +13,7 @@ import { useWeb3React } from '@web3-react/core'
 import { Web3Provider } from '@ethersproject/providers'
 
 import { defaultClaimPeriodInSec } from '../../constants'
+import { getErrorMessage } from '../../utils/error'
 
 const NO_WALLET_CONNECTED = 'NO_WALLET_CONNECTED'
 const NO_POW_AMOUNT_ENTERED = 'NO_POW_AMOUNT_ENTERED'
@@ -25,13 +26,13 @@ const errorsTranslations = {
 }
 
 type Props = {
-  library: Web3Provider | undefined
+  account: string | undefined
   ethPoWAmount: string
   ethPoSAmount: string
-  claimPeriodInSec: number
+  claimPeriodInSec: string | number
 }
-const validateForm = ({ library, ethPoWAmount, ethPoSAmount, claimPeriodInSec }: Props) => {
-  if (!library?.provider) {
+const validateForm = ({ account, ethPoWAmount, ethPoSAmount, claimPeriodInSec }: Props) => {
+  if (!account) {
     throw new Error(NO_WALLET_CONNECTED)
   }
 
@@ -56,8 +57,8 @@ function DumpBox() {
   const [shareLink, setShareLink] = React.useState('')
   const [ethPoSAmount, setPoSAmount] = useState('')
   const [ethPoWAmount, setPoWAmount] = useState('')
-
-  const { account, library } = useWeb3React<Web3Provider>()
+  const setNotification = useStore(state => state.setNotification)
+  const { account, provider } = useWeb3React<Web3Provider>()
 
   const [error, setError] = useState('')
   const handleClickCopy = async () => {
@@ -69,7 +70,7 @@ function DumpBox() {
   useEffect(() => {
     try {
       validateForm({
-        library,
+        account,
         ethPoWAmount,
         ethPoSAmount,
         claimPeriodInSec,
@@ -77,26 +78,22 @@ function DumpBox() {
 
       setError('')
     } catch (e) {
-      if (e instanceof Error) {
-        setError(e.message)
-      } else {
-        setError(e)
-      }
+      const message = getErrorMessage(e)
+      setError(message)
     }
-  }, [library, ethPoWAmount, ethPoSAmount, claimPeriodInSec])
+  }, [provider, ethPoWAmount, ethPoSAmount, claimPeriodInSec])
 
   const handleClickCommit = async () => {
     try {
       setIsCommitting(true)
 
-      validateForm({ library, ethPoWAmount, ethPoSAmount, claimPeriodInSec })
+      validateForm({ account, ethPoWAmount, ethPoSAmount, claimPeriodInSec })
 
       const secret = hexlify(randomBytes(32))
       const hashedSecret = keccak256(secret)
 
       const requestedEthAmount = String(ethPoWAmount)
 
-      // console.log("provider", library?.getSigner(account))
       const txResponse = await commit(
         {
           claimPeriodInSec: claimPeriodInSec as string,
@@ -106,7 +103,8 @@ function DumpBox() {
           expectedAmount: requestedEthAmount,
           recipient: ZERO_ADDRESS,
         },
-        library?.getSigner(account)
+        // @ts-ignore
+        provider?.getSigner(account)
       )
       const txReceipt = await txResponse.wait()
       setCommitTxHash(txReceipt.transactionHash)
@@ -117,7 +115,8 @@ function DumpBox() {
       const shareLink = `${process.env.PUBLIC_URL}/commit?hashed-secret=${hashedSecret}`
       setShareLink(shareLink)
     } catch (error) {
-      console.log(error)
+      console.log('error when submitting', error)
+      setNotification({ type: 'error', description: getErrorMessage(error), title: 'Error' })
     } finally {
       setIsCommitting(false)
     }

@@ -20,11 +20,11 @@ export function ConnectWallet() {
   }
 
   useEffect(() => {
-    const isWalletConnected = !!localStorage.getItem('isWalletConnected')
+    const isWalletConnected = localStorage.getItem('isWalletConnected') === "true"
     const connectedWallet = localStorage.getItem('connectedWallet') as supportedWalletTypes
     setIsConnected(isWalletConnected)
     setConnectedWallet(connectedWallet)
-  }, [])
+  }, [account])
 
   return (
     <>
@@ -83,7 +83,7 @@ export function ConnectWallet() {
 
                       <div className={'flex flex-col space-y-4'}>
                         {Object.values(supportedWallets).map(wallet => {
-                          return <>{wallet.connector}</>
+                          return <div key={wallet.key}>{wallet.connector}</div>
                         })}
                       </div>
                     </Dialog.Panel>
