@@ -1,6 +1,7 @@
 import { HardhatUserConfig } from "hardhat/config";
 import { config as dotenvConfig } from "dotenv";
 import "@nomicfoundation/hardhat-toolbox";
+import {ethers} from "ethers"
 
 dotenvConfig();
 
@@ -16,11 +17,17 @@ if (isCI) {
     }
   };
 } else {
-  const privateKey = process.env.GOERLI_PRIVATE_KEY as string;
+  const privateKey = process.env.GOERLI_PRIVATE_KEY as string  || ethers.constants.HashZero;
   const alchemyKey = process.env.ALCHEMY_API_KEY as string;
 
   config = {
     networks: {
+      hardhat: {
+        mining: {
+        auto: true,
+        interval: 1500,
+        },
+      },
       goerli: {
         url: `https://eth-goerli.g.alchemy.com/v2/${alchemyKey}`,
         accounts: [privateKey]

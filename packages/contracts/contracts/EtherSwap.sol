@@ -1,80 +1,105 @@
 pragma solidity 0.8.9;
 
+import "hardhat/console.sol";
 
 contract EtherSwap {
 
     struct Swap {
+        bytes32 hashedSecret;
         address payable initiator;
         uint64 endTimeStamp;
         address payable recipient;
+        uint64 changeRecipientTimestamp;
         uint256 value;
         uint256 expectedAmount;
     }
 
-    mapping(bytes32 => Swap) public swapMap; // the key is the hashedSecret
+    uint32 public numberOfSwaps;
+    uint64 public constant RECIPIENT_CHANGE_LOCK_DURATION = 60*10;
 
-    event SwapInitiatedEvent(bytes32 indexed hashedSecret, address initiator, address recipient, uint256 value, uint256 expectedAmount, uint64 endTimeStamp);
+    mapping(uint32 => Swap) public swaps;
+
+    event Commit(address initiator, address recipient, uint256 value, uint256 expectedAmount, uint64 endTimeStamp, bytes32 indexed hashedSecret, uint32 indexed id);
+    event ChangeRecipient(address recipient, uint32 indexed id);
+    event Claim(address recipient, uint256 value, bytes32 proof, uint32 indexed id);
+    event Refund(uint32 indexed id);
+
     event SwapSuccessEvent(bytes32 indexed hashedSecret, address recipient, uint256 value, address initiator);
     event SwapRefundedEvent(bytes32 indexed hashedSecret);
 
-    event SwapRecipientAddedEvent(bytes32 indexed hashedSecret, address recipient);
-
-    function commit(uint64 _lockTimeSec, bytes32 _hashedSecret, uint256 expectedAmount, address payable _recipient) external payable {
-        require(swapMap[_hashedSecret].initiator == address(0x0), "Entry already exists");
+    function commit(uint64 _lockTimeSec, bytes32 _hashedSecret, uint256 _expectedAmount, address payable _recipient) external payable {
         require(msg.value > 0, "Ether is required");
 
-        swapMap[_hashedSecret].initiator = payable(msg.sender);
-        swapMap[_hashedSecret].recipient = _recipient;
-        swapMap[_hashedSecret].endTimeStamp = uint64(block.timestamp + _lockTimeSec);
-        swapMap[_hashedSecret].value = msg.value;
-        swapMap[_hashedSecret].expectedAmount = expectedAmount;
+        Swap memory swap;
+        swap.hashedSecret = _hashedSecret;
+        swap.initiator = payable(msg.sender);
+        swap.recipient = _recipient;
+        swap.endTimeStamp = uint64(block.timestamp + _lockTimeSec);
+        swap.changeRecipientTimestamp = 0;
+        swap.value = msg.value;
+        swap.expectedAmount = _expectedAmount;
 
-        emit SwapInitiatedEvent(_hashedSecret, msg.sender, _recipient, msg.value, expectedAmount, swapMap[_hashedSecret].endTimeStamp);
+        if (_recipient != address(0)) {
+            swap.changeRecipientTimestamp = type(uint64).max;
+        }
+
+        swaps[numberOfSwaps] = swap;
+
+        emit Commit(msg.sender, _recipient, msg.value, _expectedAmount, swap.endTimeStamp, _hashedSecret, numberOfSwaps);
+
+        numberOfSwaps = numberOfSwaps + 1;
     }
 
-    function addRecipient(bytes32 _hashedSecret, address payable _recipient) external {
-        require(swapMap[_hashedSecret].recipient == address(0x0), "Recipient already added");
+    function changeRecipient(uint32 _swapId, address payable _recipient) external {
+        require(_swapId < numberOfSwaps, "No swap with corresponding id");
+        require(swaps[_swapId].changeRecipientTimestamp <= block.timestamp, "Cannot change recipient: timestamp");
 
-        swapMap[_hashedSecret].recipient = _recipient;
+        swaps[_swapId].recipient = _recipient;
+        swaps[_swapId].changeRecipientTimestamp = uint64(block.timestamp) + RECIPIENT_CHANGE_LOCK_DURATION;
 
-        emit SwapRecipientAddedEvent(_hashedSecret, _recipient);
+        emit ChangeRecipient(_recipient, _swapId);
     }
 
-    function claim(bytes32 _proof) external {
+    function claim(uint32 _id, bytes32 _proof) external {
+        require(_id < numberOfSwaps, "No swap with corresponding id");
+
+        Swap memory swap = swaps[_id];
+
+        require(swap.endTimeStamp >= block.timestamp, "Swap expired");
+        require(swap.recipient != address(0), "Swap has no recipient");
+
         bytes32 hashedSecret = keccak256(abi.encode(_proof));
-        require(swapMap[hashedSecret].initiator != address(0x0), "No entry found");
-        require(swapMap[hashedSecret].endTimeStamp >= block.timestamp, "TimeStamp violation");
-        require(swapMap[hashedSecret].recipient != address(0x0), "The entry has no recipient");
+        require(hashedSecret == swap.hashedSecret, "Incorrect secret");
 
-        address initiator = swapMap[hashedSecret].initiator;
-        uint256 value = swapMap[hashedSecret].value;
-        address payable recipient = swapMap[hashedSecret].recipient;
-
-        clean(hashedSecret);
-        recipient.transfer(value);
-        emit SwapSuccessEvent(hashedSecret, recipient, value, initiator);
+        clean(_id);
+        swap.recipient.transfer(swap.value);
+        emit Claim(swap.recipient, swap.value, _proof, _id);
     }
 
-    function refund(bytes32 _hashedSecret) external {
-        require(swapMap[_hashedSecret].initiator != address(0x0), "No entry found");
-        require(swapMap[_hashedSecret].endTimeStamp < block.timestamp, "TimeStamp violation");
+    function refund(uint32 id) external {
+        require(id < numberOfSwaps, "No swap with corresponding id");
+        require(swaps[id].endTimeStamp < block.timestamp, "TimeStamp violation");
+        require(swaps[id].value > 0, "Nothing to refund");
 
-        uint256 value = swapMap[_hashedSecret].value;
-        address payable initiator = swapMap[_hashedSecret].initiator;
-        clean(_hashedSecret);
+        uint256 value = swaps[id].value;
+        address payable initiator = swaps[id].initiator;
+
+        clean(id);
 
         initiator.transfer(value);
-        emit SwapRefundedEvent(_hashedSecret);
+        emit Refund(id);
     }
 
-    function clean(bytes32 _hashedSecret) private {
-        Swap storage swap = swapMap[_hashedSecret];
+    function clean(uint32 id) private {
+        Swap storage swap = swaps[id];
+        delete swap.hashedSecret;
         delete swap.initiator;
-        delete swap.recipient;
         delete swap.endTimeStamp;
+        delete swap.recipient;
+        delete swap.changeRecipientTimestamp;
         delete swap.value;
         delete swap.expectedAmount;
-        delete swapMap[_hashedSecret];
+        delete swaps[id];
     }
 }
 
