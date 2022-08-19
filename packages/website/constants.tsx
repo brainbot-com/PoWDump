@@ -1,3 +1,4 @@
+// @ts-ignore
 import MetamaskSvg from './public/wallets/metamask.svg'
 import ConnectMetamask from './components/connectors/metamask'
 

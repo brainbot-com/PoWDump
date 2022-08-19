@@ -1,7 +1,6 @@
-import ethereumLogoUrl from '../public/assets/images/ethereum-logo.png'
-
 import { SupportedChainId, SupportedL1ChainId } from './chains'
-import {StaticImageData} from "next/image";
+// @ts-ignore
+import ethereumLogoUrl from '../public/assets/images/ethereum-logo.png'
 
 export enum NetworkType {
   L1,
@@ -15,7 +14,7 @@ interface BaseChainInfo {
   readonly bridge?: string
   readonly explorer: string
   readonly infoLink: string
-  readonly logoUrl: StaticImageData | string
+  readonly logoUrl: string
   readonly label: string
   readonly helpCenterUrl?: string
   readonly nativeCurrency: {
