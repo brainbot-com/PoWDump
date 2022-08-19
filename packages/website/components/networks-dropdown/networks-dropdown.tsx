@@ -22,6 +22,7 @@ export default function NetworksDropdown() {
         if (chainId) {
           if (isSupportedChain(chainId)) {
             setSelectedNetwork(getChainInfo(chainId))
+            setUnsupportedNetwork(false)
           } else {
             setUnsupportedNetwork(true)
           }
