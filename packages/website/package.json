@@ -6,11 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "export": "next export",
     "lint": "next lint",
     "prettier": "prettier --write \"**/*.{js,ts,tsx,mjs,cjs}\" \"*.{js,ts,tsx,mjs,cjs}\""
-  },
-  "resolutions": {
-    "zustand": "^3.6.9"
   },
   "dependencies": {
     "@coinbase/wallet-sdk": "^3.3.0",
@@ -35,13 +33,15 @@
     "ethers": "^5.1.4",
     "graphql": "^16.5.0",
     "graphql-request": "^5.0.0-next.5",
+    "graphql-ws": "^5.10.0",
     "next": "12.2.4",
+    "next-images": "^1.8.4",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-qr-code": "^2.0.7",
     "react-query": "^3.17.0",
     "web3modal": "^1.9.8",
-    "zustand": "^3.6.9"
+    "zustand": "4.0.0-rc.0"
   },
   "devDependencies": {
     "@types/node": "18.6.4",

@@ -1,5 +1,3 @@
-import Image from 'next/image'
-
 type Props = {
   connectorKey: string
   onClick: (key: string) => void
@@ -25,7 +23,7 @@ export const ConnectorButton = ({ connectorKey, onClick, title, icon }: Props) =
           <span className={'flex flex-1 items-center justify-between'}>
             <span className={'text-lg font-medium text-gray-900 dark:text-white'}>{title}</span>
             <span className={'overflow-hidden rounded-lg'}>
-              <Image src={icon} alt={icon} className={'rounded-lg'} />
+              <img src={icon} alt={icon} className={'rounded-lg'} />
             </span>
           </span>
         </span>

@@ -3,7 +3,7 @@ import { Fragment, useEffect, useState } from 'react'
 import { Transition } from '@headlessui/react'
 import { CheckCircleIcon, ExclamationCircleIcon, XCircleIcon, InformationCircleIcon } from '@heroicons/react/outline'
 import { XIcon } from '@heroicons/react/solid'
-import { errorForNotifications, useStore } from '../../store'
+import { NotificationType, useStore } from '../../store'
 
 const icons = {
   error: <XCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />,
@@ -13,7 +13,7 @@ const icons = {
 }
 export default function Notification() {
   const [show, setShow] = useState(false)
-  const [shownError, setShownError] = useState<null | errorForNotifications>(null)
+  const [shownError, setShownError] = useState<null | NotificationType>(null)
   const notification = useStore(state => state.notification)
 
   const icon = notification && notification.type && icons[notification.type]
@@ -31,7 +31,7 @@ export default function Notification() {
     } else {
       setShow(false)
     }
-  }, [notification])
+  }, [notification, shownError])
 
   return (
     <>

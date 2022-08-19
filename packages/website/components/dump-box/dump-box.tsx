@@ -81,7 +81,7 @@ function DumpBox() {
       const message = getErrorMessage(e)
       setError(message)
     }
-  }, [provider, ethPoWAmount, ethPoSAmount, claimPeriodInSec])
+  }, [account, ethPoWAmount, ethPoSAmount, claimPeriodInSec])
 
   const handleClickCommit = async () => {
     try {

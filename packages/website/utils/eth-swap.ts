@@ -58,7 +58,7 @@ export async function addRecipient(
 }
 
 export async function claim(secret: string, signer: JsonRpcSigner) {
-  const ethSwapContract = new Contract(addresses.ethSwap, abis.ethSwap, signer)
+  const ethSwapContract = new Contract(config.ETH_POS_CONTRACT_ADDRESS, abis.abi, signer)
   const txResponse: TransactionResponse = await ethSwapContract.secretProof(secret)
 
   return txResponse
