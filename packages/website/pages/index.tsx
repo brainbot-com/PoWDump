@@ -1,26 +1,16 @@
-import type { NextPage } from 'next'
-import { CommitBox } from "../components/commit-box";
+import type {NextPage} from 'next'
 
-import { useStore } from "../store";
 import Layout from "../components/layout";
+import {DumpBox} from "../components/dump-box";
 
 const Home: NextPage = () => {
-  const activeNavBarSwitchItem = useStore(
-      (state) => state.activeNavBarSwitchItem
-  );
-  const setActiveNavBarSwitchItem = useStore(
-      (state) => state.setActiveNavBarSwitchItem
-  );
-  const setActiveCommitBoxSwitchItem = useStore(
-      (state) => state.setActiveCommitBoxSwitchItem
-  );
 
-  return (
-    <Layout title={'Create Next App'}>
-        <CommitBox />
-    </Layout>
+    return (
+        <Layout title={'PoWDump'}>
+            <DumpBox/>
+        </Layout>
 
-  )
+    )
 }
 
 export default Home

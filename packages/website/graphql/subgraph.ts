@@ -1,4 +1,4 @@
-import { gql } from "graphql-request";
+import { gql } from 'graphql-request'
 
 const GET_TRANSFERS = gql`
   {
@@ -9,6 +9,6 @@ const GET_TRANSFERS = gql`
       value
     }
   }
-`;
+`
 
-export default GET_TRANSFERS;
+export default GET_TRANSFERS

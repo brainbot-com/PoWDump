@@ -1,16 +1,16 @@
-import React from "react";
+import React from 'react'
 
 type Props = {
-  id: string;
-  label: string;
-  value: string;
-  onChangeInputValue: (changedInputValue: string) => void;
-  type?: string;
-  withScanButton?: boolean;
-  onClickScanButton?: () => void;
-  min?: string | number;
-  max?: string | number;
-};
+  id: string
+  label: string
+  value: string
+  onChangeInputValue: (changedInputValue: string) => void
+  type?: string
+  withScanButton?: boolean
+  onClickScanButton?: () => void
+  min?: string | number
+  max?: string | number
+}
 
 function LabeledInput(props: Props) {
   return (
@@ -22,21 +22,18 @@ function LabeledInput(props: Props) {
           type={props.type}
           id={props.id}
           value={props.value}
-          onChange={(event) => props.onChangeInputValue(event.target.value)}
+          onChange={event => props.onChangeInputValue(event.target.value)}
           min={props.min}
           max={props.max}
         />
         {props.withScanButton && (
-          <button
-            className="flex flex-row items-center justify-center px-4"
-            onClick={props.onClickScanButton}
-          >
+          <button className="flex flex-row items-center justify-center px-4" onClick={props.onClickScanButton}>
             Scan
           </button>
         )}
       </div>
     </div>
-  );
+  )
 }
 
-export { LabeledInput };
+export { LabeledInput }
