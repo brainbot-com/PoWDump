@@ -6,12 +6,17 @@ import {BigNumber} from "ethers"
 import {EtherSwap} from "../typechain-types"
 
 describe("EtherSwap", function () {
+
+  const RECIPIENT_CHANGE_LOCK_DURATION = 10*60;
+  const FEE_RECIPIENT = "0x0000000000000000000000000000000000001234";
+  const FEE_PER_MILLION = 1000
+
   // We define a fixture to reuse the same setup in every test.
   // We use loadFixture to run this setup once, snapshot that state,
   // and reset Hardhat Network to that snapshopt in every test.
   async function deployEtherSwap() {
     const EtherSwapFactory = await ethers.getContractFactory("EtherSwap");
-    return EtherSwapFactory.deploy();
+    return EtherSwapFactory.deploy(RECIPIENT_CHANGE_LOCK_DURATION, FEE_RECIPIENT, FEE_PER_MILLION);
   }
 
   async function deployCommit() {
@@ -132,7 +137,7 @@ describe("EtherSwap", function () {
       await etherSwap.changeRecipient(0, newRecipient)
 
       newRecipient = (await ethers.getSigners())[2].address
-      await ethers.provider.send("evm_increaseTime", [600])
+      await ethers.provider.send("evm_increaseTime", [RECIPIENT_CHANGE_LOCK_DURATION])
       await etherSwap.changeRecipient(0, newRecipient)
 
       const commit = await etherSwap.swaps(0)

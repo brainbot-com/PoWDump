@@ -15,7 +15,10 @@ contract EtherSwap {
     }
 
     uint32 public numberOfSwaps;
-    uint64 public constant RECIPIENT_CHANGE_LOCK_DURATION = 60*10;
+    uint64 public recipientChangeLockDuration;
+
+    address public feeRecipient;
+    uint64 public feePerMillion;
 
     mapping(uint32 => Swap) public swaps;
 
@@ -23,6 +26,12 @@ contract EtherSwap {
     event ChangeRecipient(address recipient, uint32 indexed id);
     event Claim(address recipient, uint256 value, bytes32 proof, uint32 indexed id);
     event Refund(uint32 indexed id);
+
+    constructor (uint64 _recipientChangeLockDuration, address _feeRecipient, uint64 _feePerMillion) {
+        recipientChangeLockDuration = _recipientChangeLockDuration;
+        feeRecipient = _feeRecipient;
+        feePerMillion = _feePerMillion;
+    }
 
     function commit(uint64 _lockTimeSec, bytes32 _hashedSecret, uint256 _expectedAmount, address payable _recipient) external payable {
         require(msg.value > 0, "Ether is required");
@@ -52,7 +61,7 @@ contract EtherSwap {
         require(swaps[_swapId].changeRecipientTimestamp <= block.timestamp, "Cannot change recipient: timestamp");
 
         swaps[_swapId].recipient = _recipient;
-        swaps[_swapId].changeRecipientTimestamp = uint64(block.timestamp) + RECIPIENT_CHANGE_LOCK_DURATION;
+        swaps[_swapId].changeRecipientTimestamp = uint64(block.timestamp) + recipientChangeLockDuration;
 
         emit ChangeRecipient(_recipient, _swapId);
     }

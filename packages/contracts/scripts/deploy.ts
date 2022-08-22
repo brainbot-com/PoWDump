@@ -1,5 +1,6 @@
 import { ethers } from "hardhat";
 const hre = require("hardhat");
+
 async function main() {
   const [deployer] = await ethers.getSigners();
 
@@ -7,8 +8,17 @@ async function main() {
 
   console.log("Account balance:", (await deployer.getBalance()).toString());
 
+  const recipientChangeLockDuration = 10*60;
+  const feeRecipient = "0x0000000000000000000000000000000000001234";
+  const feePerMillion = 1000
+
+  console.log("Using default params for deployment:")
+  console.log("Recipient change lock duration:", recipientChangeLockDuration)
+  console.log("Fee recipient:", feeRecipient)
+  console.log("Fee per million:", feePerMillion)
+
   const EtherSwap = await ethers.getContractFactory("EtherSwap");
-  const swap = await EtherSwap.deploy();
+  const swap = await EtherSwap.deploy(recipientChangeLockDuration, feeRecipient, feePerMillion);
 
   await swap.deployed();
 
