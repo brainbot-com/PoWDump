@@ -1,14 +1,14 @@
 import {
-    SwapRefundedEvent,
-    SwapInitiatedEvent,
-    SwapSuccessEvent,
-    SwapRecipientAddedEvent
-} from "../generated/EtherSwap/EtherSwap";
+    ChangeRecipient,
+    Claim,
+    Commit, Refund
+
+} from "../generated/EtherSwap/EtherSwap"
 import {SwapCommitment} from "../generated/schema";
 
 // Create a swapCommitment and add it to the database
-export function handleSwapInitiatedEvent(event: SwapInitiatedEvent): void {
-    const id = event.params.hashedSecret.toHex();
+export function handleCommit(event: Commit): void {
+    const id = event.params.id.toString();
 
     const swapCommitment = new SwapCommitment(id);
 
@@ -17,25 +17,26 @@ export function handleSwapInitiatedEvent(event: SwapInitiatedEvent): void {
     swapCommitment.recipient = event.params.recipient;
     swapCommitment.value = event.params.value;
     swapCommitment.expectedAmount = event.params.expectedAmount;
-    swapCommitment.hashedSecret = event.params.hashedSecret;
     swapCommitment.endTimeStamp = event.params.endTimeStamp;
+    swapCommitment.hashedSecret = event.params.hashedSecret;
     swapCommitment.emptied = false;
     swapCommitment.refunded = false;
 
     swapCommitment.save();
 }
 
-export function handleSwapSuccessEvent(event: SwapSuccessEvent): void {
-    const swapCommitment = SwapCommitment.load(event.params.hashedSecret.toHex())
+export function handleClaim(event: Claim): void {
+    const swapCommitment = SwapCommitment.load(event.params.id.toHex())
 
     if(swapCommitment !== null) {
         swapCommitment.emptied = true;
+        swapCommitment.proof = event.params.proof
         swapCommitment.save();
     }
 }
 
-export function handleSwapRefundedEvent(event: SwapRefundedEvent): void {
-    const swapCommitment = SwapCommitment.load(event.params.hashedSecret.toHex())
+export function handleRefund(event: Refund): void {
+    const swapCommitment = SwapCommitment.load(event.params.id.toHex())
 
     if(swapCommitment !== null) {
         swapCommitment.refunded = true;
@@ -43,8 +44,8 @@ export function handleSwapRefundedEvent(event: SwapRefundedEvent): void {
     }
 }
 
-export function handleSwapRecipientAddedEvent(event: SwapRecipientAddedEvent): void {
-    const swapCommitment = SwapCommitment.load(event.params.hashedSecret.toHex())
+export function handleChangeRecipient(event: ChangeRecipient): void {
+    const swapCommitment = SwapCommitment.load(event.params.id.toHex())
 
     if(swapCommitment !== null) {
         swapCommitment.recipient = event.params.recipient;

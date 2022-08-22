@@ -1,6 +1,7 @@
 type SwapCommitment @entity {
   id: ID!
   hashedSecret: Bytes!
+  proof: Bytes!
   initiator: Bytes!
   recipient: Bytes!
   endTimeStamp: BigInt!

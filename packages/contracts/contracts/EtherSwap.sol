@@ -24,9 +24,6 @@ contract EtherSwap {
     event Claim(address recipient, uint256 value, bytes32 proof, uint32 indexed id);
     event Refund(uint32 indexed id);
 
-    event SwapSuccessEvent(bytes32 indexed hashedSecret, address recipient, uint256 value, address initiator);
-    event SwapRefundedEvent(bytes32 indexed hashedSecret);
-
     function commit(uint64 _lockTimeSec, bytes32 _hashedSecret, uint256 _expectedAmount, address payable _recipient) external payable {
         require(msg.value > 0, "Ether is required");
 

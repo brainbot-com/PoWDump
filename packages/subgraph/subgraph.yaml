@@ -18,13 +18,12 @@ dataSources:
         - name: EtherSwap
           file: ../contracts/artifacts/contracts/EtherSwap.sol/EtherSwap.json
       eventHandlers:
-        - event: SwapInitiatedEvent(indexed
-            bytes32,address,address,uint256,uint256,uint64)
-          handler: handleSwapInitiatedEvent
-        - event: SwapSuccessEvent(indexed bytes32,address,uint256,address)
-          handler: handleSwapSuccessEvent
-        - event: SwapRefundedEvent(indexed bytes32)
-          handler: handleSwapRefundedEvent
-        - event: SwapRecipientAddedEvent(indexed bytes32,address)
-          handler: handleSwapRecipientAddedEvent
+        - event: Commit(address,address,uint256,uint256,uint64,indexed bytes32,indexed uint32)
+          handler: handleCommit
+        - event: Claim(address,uint256,bytes32,indexed uint32)
+          handler: handleClaim
+        - event: Refund(indexed uint32)
+          handler: handleRefund
+        - event: ChangeRecipient(address,indexed uint32)
+          handler: handleChangeRecipient
       file: ./src/EtherSwap.ts
