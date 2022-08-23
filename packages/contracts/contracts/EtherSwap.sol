@@ -19,6 +19,7 @@ contract EtherSwap {
 
     address public feeRecipient;
     uint64 public feePerMillion;
+    uint256 public collectedFees;
 
     mapping(uint32 => Swap) public swaps;
 
@@ -33,8 +34,11 @@ contract EtherSwap {
         feePerMillion = _feePerMillion;
     }
 
-    function commit(uint64 _lockTimeSec, bytes32 _hashedSecret, uint256 _expectedAmount, address payable _recipient) external payable {
+    function commit(uint64 _lockTimeSec, bytes32 _hashedSecret, uint256 _payout, uint256 _expectedAmount, address payable _recipient) external payable {
         require(msg.value > 0, "Ether is required");
+
+        uint256 fee = feeFromSwapValue(_payout);
+        require(msg.value == fee + _payout, "Ether value does not match payout + fee");
 
         Swap memory swap;
         swap.hashedSecret = _hashedSecret;
@@ -42,7 +46,7 @@ contract EtherSwap {
         swap.recipient = _recipient;
         swap.endTimeStamp = uint64(block.timestamp + _lockTimeSec);
         swap.changeRecipientTimestamp = 0;
-        swap.value = msg.value;
+        swap.value = _payout;
         swap.expectedAmount = _expectedAmount;
 
         if (_recipient != address(0)) {
@@ -51,7 +55,7 @@ contract EtherSwap {
 
         swaps[numberOfSwaps] = swap;
 
-        emit Commit(msg.sender, _recipient, msg.value, _expectedAmount, swap.endTimeStamp, _hashedSecret, numberOfSwaps);
+        emit Commit(msg.sender, _recipient, _payout, _expectedAmount, swap.endTimeStamp, _hashedSecret, numberOfSwaps);
 
         numberOfSwaps = numberOfSwaps + 1;
     }
@@ -77,6 +81,7 @@ contract EtherSwap {
         bytes32 hashedSecret = keccak256(abi.encode(_proof));
         require(hashedSecret == swap.hashedSecret, "Incorrect secret");
 
+        collectedFees = collectedFees + feeFromSwapValue(swap.value);
         clean(_id);
         swap.recipient.transfer(swap.value);
         emit Claim(swap.recipient, swap.value, _proof, _id);
@@ -88,11 +93,12 @@ contract EtherSwap {
         require(swaps[id].value > 0, "Nothing to refund");
 
         uint256 value = swaps[id].value;
+        uint256 fee = feeFromSwapValue(value);
         address payable initiator = swaps[id].initiator;
 
         clean(id);
 
-        initiator.transfer(value);
+        initiator.transfer(value + fee);
         emit Refund(id);
     }
 
@@ -106,6 +112,17 @@ contract EtherSwap {
         delete swap.value;
         delete swap.expectedAmount;
         delete swaps[id];
+    }
+
+    /**
+     * @notice Get the fee paid for a swap from its swap value
+               msg.value = swap value + fee
+     * @param value the swap value
+     * @return the fee paid for the swap
+     **/
+    function feeFromSwapValue(uint256 value) public view returns(uint256) {
+        uint256 fee = value * feePerMillion / 1_000_000;
+        return fee;
     }
 }
 

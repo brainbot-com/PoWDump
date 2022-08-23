@@ -4,6 +4,7 @@ import { ethers } from "hardhat";
 import {randomBytes} from "ethers/lib/utils"
 import {BigNumber} from "ethers"
 import {EtherSwap} from "../typechain-types"
+import exp from "constants"
 
 describe("EtherSwap", function () {
 
@@ -15,6 +16,11 @@ describe("EtherSwap", function () {
   // We use loadFixture to run this setup once, snapshot that state,
   // and reset Hardhat Network to that snapshopt in every test.
   async function deployEtherSwap() {
+    const EtherSwapFactory = await ethers.getContractFactory("EtherSwap");
+    return EtherSwapFactory.deploy(RECIPIENT_CHANGE_LOCK_DURATION, ethers.constants.AddressZero, 0);
+  }
+
+  async function deployEtherSwapWithFees() {
     const EtherSwapFactory = await ethers.getContractFactory("EtherSwap");
     return EtherSwapFactory.deploy(RECIPIENT_CHANGE_LOCK_DURATION, FEE_RECIPIENT, FEE_PER_MILLION);
   }
@@ -29,7 +35,7 @@ describe("EtherSwap", function () {
     const value = 2
     const recipient = ethers.constants.AddressZero
 
-    await etherSwap.commit(lockTime, hashedSecret, expectedAmount, recipient, {"value": value})
+    await etherSwap.commit(lockTime, hashedSecret, value, expectedAmount, recipient, {"value": value})
 
     return {etherSwap, secret};
   }
@@ -45,7 +51,7 @@ describe("EtherSwap", function () {
       const recipient = ethers.constants.AddressZero
       const txSender = (await ethers.getSigners())[0].address
 
-      await etherSwap.commit(lockTime, hashedSecret, expectedAmount, recipient, {"value": value})
+      await etherSwap.commit(lockTime, hashedSecret, value, expectedAmount, recipient, {"value": value})
 
       const blockTime = (await ethers.provider.getBlock("latest")).timestamp
 
@@ -71,7 +77,7 @@ describe("EtherSwap", function () {
       const recipient = (await ethers.getSigners())[1].address
       const txSender = (await ethers.getSigners())[0].address
 
-      await etherSwap.commit(lockTime, hashedSecret, expectedAmount, recipient, {"value": value})
+      await etherSwap.commit(lockTime, hashedSecret, value, expectedAmount, recipient, {"value": value})
 
       const blockTime = (await ethers.provider.getBlock("latest")).timestamp
       const maxUint64 = BigNumber.from(2).pow(64).sub(1)
@@ -98,7 +104,7 @@ describe("EtherSwap", function () {
       const recipient = (await ethers.getSigners())[1].address
       const txSender = (await ethers.getSigners())[0].address
 
-      await expect(etherSwap.commit(lockTime, hashedSecret, expectedAmount, recipient, {"value": value})).to.emit(
+      await expect(etherSwap.commit(lockTime, hashedSecret, value, expectedAmount, recipient, {"value": value})).to.emit(
           etherSwap, "Commit"
       ).withArgs(txSender, recipient, value, expectedAmount, (await ethers.provider.getBlock("latest")).timestamp + lockTime, hashedSecret, 0)
     });
@@ -253,6 +259,95 @@ describe("EtherSwap", function () {
       await etherSwap.refund(0)
 
       await expect(etherSwap.claim(0, secret)).to.be.revertedWith("Swap expired")
+    });
+  });
+
+  describe("Fees", function () {
+    it("Should calculate the right fees", async function () {
+      const etherSwap = await loadFixture(deployEtherSwapWithFees);
+
+      const values = [1_234_000, 1_000_000, 1_234_000_000, 456, 888_888]
+      const expectedFees = values.map(value => Math.floor(value * FEE_PER_MILLION / 1_000_000))
+
+      for (let i = 0; i < values.length; i++) {
+        expect(etherSwap.feeFromSwapValue(values[i])).to.eventually.equal(expectedFees[i])
+      }
+    });
+
+    it("Should collect fee on commit", async function () {
+      const etherSwap = await loadFixture(deployEtherSwapWithFees);
+
+      const lockTime = 365 * 24 * 60 * 60;
+      const hashedSecret = randomBytes(32)
+      const expectedAmount = 1
+      const value = 1_000
+      const msgValue = 1_001
+      const recipient = ethers.constants.AddressZero
+      await etherSwap.commit(lockTime, hashedSecret, value, expectedAmount, recipient, {"value": msgValue})
+
+      const commit = await etherSwap.swaps(0)
+      expect(commit.value).to.equal(value)
+
+      expect(await etherSwap.provider.getBalance(etherSwap.address)).to.equal(msgValue)
+    });
+
+    it("Should refuse commit with wrong fees", async function () {
+      const etherSwap = await loadFixture(deployEtherSwapWithFees);
+
+      const lockTime = 365 * 24 * 60 * 60;
+      const hashedSecret = randomBytes(32)
+      const expectedAmount = 1
+      const value = 1_000
+      const msgValue = 1_001
+      const recipient = ethers.constants.AddressZero
+
+      await expect(etherSwap.commit(lockTime, hashedSecret, value, expectedAmount, recipient, {"value": msgValue + 1}))
+        .to.be.revertedWith("Ether value does not match payout + fee")
+      await expect(etherSwap.commit(lockTime, hashedSecret, value, expectedAmount, recipient, {"value": msgValue - 1}))
+        .to.be.revertedWith("Ether value does not match payout + fee")
+    });
+
+    it("Should increase collected fees on claim", async function () {
+      const etherSwap = await loadFixture(deployEtherSwapWithFees);
+
+      const lockTime = 365 * 24 * 60 * 60;
+      const secret = randomBytes(32)
+      const hashedSecret = ethers.utils.keccak256(secret)
+      const expectedAmount = 1
+      const value = 1_000
+      const msgValue = 1_001
+      const recipient = (await ethers.getSigners())[1].address
+      await etherSwap.commit(lockTime, hashedSecret, value, expectedAmount, recipient, {"value": msgValue})
+
+      expect(etherSwap.collectedFees()).to.eventually.equal(0)
+
+      await etherSwap.claim(0, secret)
+
+      expect(etherSwap.collectedFees()).to.eventually.equal(1)
+      expect(etherSwap.provider.getBalance(etherSwap.address)).to.eventually.equal(1)
+    });
+
+    it("Should reimburse collected fees on refund", async function () {
+      const etherSwap = await loadFixture(deployEtherSwapWithFees);
+
+      const lockTime = 365 * 24 * 60 * 60;
+      const secret = randomBytes(32)
+      const hashedSecret = ethers.utils.keccak256(secret)
+      const expectedAmount = 1
+      const value = 1_000
+      const msgValue = 1_001
+      const recipient = (await ethers.getSigners())[1]
+      const committer = (await ethers.getSigners())[0].address
+
+      await etherSwap.commit(lockTime, hashedSecret, value, expectedAmount, recipient.address, {"value": msgValue})
+
+      const balanceBefore = await ethers.provider.getBalance(committer)
+      await ethers.provider.send("evm_increaseTime", [lockTime + 1])
+      await etherSwap.connect(recipient).refund(0)
+      const balanceAfter = await ethers.provider.getBalance(committer)
+
+      expect(etherSwap.collectedFees()).to.eventually.equal(0)
+      expect(balanceAfter.sub(balanceBefore)).to.equal(msgValue)
     });
   });
 });
