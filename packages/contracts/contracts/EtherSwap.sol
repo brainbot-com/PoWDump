@@ -17,7 +17,7 @@ contract EtherSwap {
     uint32 public numberOfSwaps;
     uint64 public recipientChangeLockDuration;
 
-    address public feeRecipient;
+    address payable public feeRecipient;
     uint64 public feePerMillion;
     uint256 public collectedFees;
 
@@ -27,8 +27,9 @@ contract EtherSwap {
     event ChangeRecipient(address recipient, uint32 indexed id);
     event Claim(address recipient, uint256 value, bytes32 proof, uint32 indexed id);
     event Refund(uint32 indexed id);
+    event WithdrawFees(uint256 value);
 
-    constructor (uint64 _recipientChangeLockDuration, address _feeRecipient, uint64 _feePerMillion) {
+    constructor (uint64 _recipientChangeLockDuration, address payable _feeRecipient, uint64 _feePerMillion) {
         recipientChangeLockDuration = _recipientChangeLockDuration;
         feeRecipient = _feeRecipient;
         feePerMillion = _feePerMillion;
@@ -100,6 +101,13 @@ contract EtherSwap {
 
         initiator.transfer(value + fee);
         emit Refund(id);
+    }
+
+    function withdrawFees() external {
+        uint256 toTransfer = collectedFees;
+        collectedFees = 0;
+        feeRecipient.transfer(toTransfer);
+        emit WithdrawFees(toTransfer);
     }
 
     function clean(uint32 id) private {
