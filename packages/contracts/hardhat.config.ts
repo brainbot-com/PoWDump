@@ -18,8 +18,8 @@ if (isCI) {
     }
   };
 } else {
-  const pow_url = process.env.POW_URL as string | "http://localhost:8546";
-  const pos_url = process.env.POS_URL as string | "http://localhost:8545";
+  const pow_url = process.env.POW_URL as string || "http://localhost:8546";
+  const pos_url = process.env.POS_URL as string || "http://localhost:8545";
 
   const seed = process.env.PRIVKEY_MNEMONIC as string;
   const default_accounts= {
