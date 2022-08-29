@@ -7,6 +7,7 @@ WORKDIR /usr/app
 COPY ./ .
 
 RUN yarn
+RUN yarn workspace @package/dump-pow-contracts compile
 WORKDIR /usr/app/packages
 
 ENTRYPOINT ["npx"]
