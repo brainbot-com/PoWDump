@@ -1,5 +1,5 @@
 {
-  "name": "@project/dump-pow-subgraph",
+  "name": "@package/dump-pow-subgraph",
   "version": "0.0.1",
   "license": "UNLICENSED",
   "scripts": {

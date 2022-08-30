@@ -1,5 +1,5 @@
 {
-  "name": "@project/dump-pow-contracts",
+  "name": "@package/dump-pow-contracts",
   "version": "0.0.1",
   "scripts": {
     "compile": "npx hardhat compile",

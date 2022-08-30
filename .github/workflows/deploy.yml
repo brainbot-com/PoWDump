@@ -28,9 +28,9 @@ jobs:
           CI: true
         run: |
           yarn
-          yarn workspace @project/dump-pow-contracts compile
-          yarn workspace @project/dump-pow-website run build
-          yarn workspace @project/dump-pow-website run export
+          yarn workspace @package/dump-pow-contracts compile
+          yarn workspace @package/dump-pow-website run build
+          yarn workspace @package/dump-pow-website run export
           cp ./packages/website/CNAME ./packages/website/out/CNAME
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3

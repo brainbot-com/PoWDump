@@ -1,5 +1,5 @@
 {
-  "name": "@project/dump-pow-website",
+  "name": "@package/dump-pow-website",
   "version": "0.0.1",
   "private": true,
   "scripts": {
@@ -14,7 +14,7 @@
     "@coinbase/wallet-sdk": "^3.3.0",
     "@headlessui/react": "^1.6.6",
     "@heroicons/react": "^1.0.6",
-    "@project/dump-pow-contracts": "*",
+    "@package/dump-pow-contracts": "*",
     "@types/ms.macro": "^2.0.0",
     "@uniswap/sdk-core": "^3.0.1",
     "@walletconnect/ethereum-provider": "^1.8.0",

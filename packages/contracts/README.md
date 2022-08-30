@@ -1,4 +1,4 @@
-# @project/dump-pow-contracts
+# @package/dump-pow-contracts
 
 This package contains the dumpPOW smart contract and its ABI. The package is created with hardhat.
 
