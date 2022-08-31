@@ -7,10 +7,10 @@ dataSources:
     network: pow
     source:
       abi: EtherSwap
-      address: "0x5FbDB2315678afecb367f032d93F642f64180aa3"
+      address: "0xee08E5e6643952b3cb22642D2a04A2992141EDDd"
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.5
+      apiVersion: 0.0.6
       language: wasm/assemblyscript
       entities:
         - Withdrawal
@@ -18,7 +18,8 @@ dataSources:
         - name: EtherSwap
           file: ../contracts/artifacts/contracts/EtherSwap.sol/EtherSwap.json
       eventHandlers:
-        - event: Commit(address,address,uint256,uint256,uint64,indexed bytes32,indexed uint32)
+        - event: Commit(address,address,uint256,uint256,uint64,indexed bytes32,indexed
+            uint32)
           handler: handleCommit
         - event: Claim(address,uint256,bytes32,indexed uint32)
           handler: handleClaim

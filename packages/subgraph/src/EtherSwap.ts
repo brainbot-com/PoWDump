@@ -1,3 +1,4 @@
+import { Bytes } from "@graphprotocol/graph-ts";
 import {
     ChangeRecipient,
     Claim,
@@ -19,6 +20,7 @@ export function handleCommit(event: Commit): void {
     swapCommitment.expectedAmount = event.params.expectedAmount;
     swapCommitment.endTimeStamp = event.params.endTimeStamp;
     swapCommitment.hashedSecret = event.params.hashedSecret;
+    swapCommitment.proof = Bytes.empty();
     swapCommitment.emptied = false;
     swapCommitment.refunded = false;
 
@@ -26,7 +28,7 @@ export function handleCommit(event: Commit): void {
 }
 
 export function handleClaim(event: Claim): void {
-    const swapCommitment = SwapCommitment.load(event.params.id.toHex())
+    const swapCommitment = SwapCommitment.load(event.params.id.toString())
 
     if(swapCommitment !== null) {
         swapCommitment.emptied = true;
@@ -36,7 +38,7 @@ export function handleClaim(event: Claim): void {
 }
 
 export function handleRefund(event: Refund): void {
-    const swapCommitment = SwapCommitment.load(event.params.id.toHex())
+    const swapCommitment = SwapCommitment.load(event.params.id.toString())
 
     if(swapCommitment !== null) {
         swapCommitment.refunded = true;
@@ -45,7 +47,7 @@ export function handleRefund(event: Refund): void {
 }
 
 export function handleChangeRecipient(event: ChangeRecipient): void {
-    const swapCommitment = SwapCommitment.load(event.params.id.toHex())
+    const swapCommitment = SwapCommitment.load(event.params.id.toString())
 
     if(swapCommitment !== null) {
         swapCommitment.recipient = event.params.recipient;
