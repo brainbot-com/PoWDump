@@ -14,6 +14,8 @@ import { Web3Provider } from '@ethersproject/providers'
 
 import { defaultClaimPeriodInSec } from '../../constants'
 import { getErrorMessage } from '../../utils/error'
+import { SearchSwap } from './search-swap'
+import { SearchRecipient } from './search-recipient'
 
 const NO_WALLET_CONNECTED = 'NO_WALLET_CONNECTED'
 const NO_POW_AMOUNT_ENTERED = 'NO_POW_AMOUNT_ENTERED'
@@ -49,6 +51,12 @@ const validateForm = ({ account, ethPoWAmount, ethPoSAmount, claimPeriodInSec }:
   }
 }
 
+
+function getSwapIdFromTxReceipt(txReceipt: any) {
+  const swapId = txReceipt.events[0].args.id
+  return swapId
+}
+
 function DumpBox() {
   const [claimPeriodInSec, setClaimPeriodInSec] = React.useState<string | number>(defaultClaimPeriodInSec)
   const [isCommitting, setIsCommitting] = React.useState(false)
@@ -57,6 +65,8 @@ function DumpBox() {
   const [shareLink, setShareLink] = React.useState('')
   const [ethPoSAmount, setPoSAmount] = useState('')
   const [ethPoWAmount, setPoWAmount] = useState('')
+  const [swapId, setSwapId] = useState(null)
+  const [counterparty, setCounterparty] = useState('')
   const setNotification = useStore(state => state.setNotification)
   const { account, provider } = useWeb3React<Web3Provider>()
 
@@ -94,20 +104,24 @@ function DumpBox() {
 
       const requestedEthAmount = String(ethPoWAmount)
 
+      const commitment = {
+        claimPeriodInSec: claimPeriodInSec as string,
+        hashedSecret,
+        initiatorEthAddress: connectedETHAddress as string,
+        lockedEthAmount: ethPoSAmount,
+        expectedAmount: requestedEthAmount,
+        recipient: ZERO_ADDRESS,
+      }
       const txResponse = await commit(
-        {
-          claimPeriodInSec: claimPeriodInSec as string,
-          hashedSecret,
-          initiatorEthAddress: connectedETHAddress as string,
-          lockedEthAmount: ethPoSAmount,
-          expectedAmount: requestedEthAmount,
-          recipient: ZERO_ADDRESS,
-        },
+        commitment,
         // @ts-ignore
         provider?.getSigner(account)
       )
+      setCommitTxHash(txResponse.hash)
       const txReceipt = await txResponse.wait()
-      setCommitTxHash(txReceipt.transactionHash)
+
+      setSwapId(getSwapIdFromTxReceipt(txReceipt))
+
       setClaimPeriodInSec('')
 
       setStateSecret(secret)
@@ -120,6 +134,46 @@ function DumpBox() {
     } finally {
       setIsCommitting(false)
     }
+  }
+
+  if (isCommitting && commitTxHash === '') {
+    return (<div>
+      Waiting for confirmation
+      Trying to dump {ethPoWAmount} ETHPOW for {ethPoSAmount} ETH on POS
+      The deal will be valid for {claimPeriodInSec} seconds
+    </div>)
+  }
+
+  if (commitTxHash && swapId === null) {
+    return (
+      <div>
+        <div>
+          <div>Waiting for transaction to be mined</div>
+          <div>Transaction hash: {commitTxHash}</div>
+          <div>Secret: {stateSecret}</div>
+        </div>
+      </div>
+    )
+  }
+
+  if(commitTxHash && swapId !== null && account) {
+    return (
+        <div>
+          <div>
+            <div>
+              <SearchRecipient swapId={swapId} onRecipient={address => setCounterparty(address)} />
+              {counterparty && (
+                  <SearchSwap recipient={account} secret={(stateSecret)} initiator={counterparty} expectedPoSAmount={ethPoSAmount}/>
+              )}
+            </div>
+
+            <div>Transaction hash: {commitTxHash}</div>
+            <div>Secret: {stateSecret}</div>
+
+
+          </div>
+        </div>
+    )
   }
 
   return (

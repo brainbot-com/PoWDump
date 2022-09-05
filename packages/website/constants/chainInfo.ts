@@ -85,7 +85,34 @@ const CHAIN_INFO: ChainInfoMap = {
     label: 'Görli',
     logoUrl: ethereumLogoUrl,
     nativeCurrency: { name: 'Görli Ether', symbol: 'görETH', decimals: 18 },
-  }
+  },
+  [SupportedChainId.HARDHAT]: {
+    networkType: NetworkType.L1,
+    docs: 'https://hardhat.org/',
+    explorer: '',
+    infoLink: '',
+    label: 'Hardhat',
+    logoUrl: ethereumLogoUrl,
+    nativeCurrency: { name: 'Hardhat Ether', symbol: 'hardETH', decimals: 18 },
+  },
+  [SupportedChainId.LOCAL_POS]: {
+    networkType: NetworkType.L1,
+    docs: 'https://hardhat.org/',
+    explorer: '',
+    infoLink: '',
+    label: 'localPoS',
+    logoUrl: ethereumLogoUrl,
+    nativeCurrency: { name: 'Local PoS', symbol: 'localPoS', decimals: 18 },
+  },
+  [SupportedChainId.LOCAL_POW]: {
+    networkType: NetworkType.L1,
+    docs: 'https://hardhat.org/',
+    explorer: '',
+    infoLink: '',
+    label: 'localPoW',
+    logoUrl: ethereumLogoUrl,
+    nativeCurrency: { name: 'Local PoW', symbol: 'localPoW', decimals: 18 },
+  },
 }
 
 export function getChainInfo(chainId: SupportedL1ChainId): L1ChainInfo

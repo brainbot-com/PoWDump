@@ -7,6 +7,9 @@ export enum SupportedChainId {
   RINKEBY = 4,
   GOERLI = 5,
   KOVAN = 42,
+  HARDHAT = 31337,
+  LOCAL_POS = 4242,
+  LOCAL_POW = 10011,
 }
 
 export const CHAIN_IDS_TO_NAMES = {
@@ -15,6 +18,9 @@ export const CHAIN_IDS_TO_NAMES = {
   [SupportedChainId.RINKEBY]: 'rinkeby',
   [SupportedChainId.GOERLI]: 'goerli',
   [SupportedChainId.KOVAN]: 'kovan',
+  [SupportedChainId.HARDHAT]: 'hardhat',
+  [SupportedChainId.LOCAL_POS]: 'localPoS',
+  [SupportedChainId.LOCAL_POW]: 'LocalPoS',
 }
 
 /**
@@ -38,6 +44,9 @@ export const TESTNET_CHAIN_IDS = [
   SupportedChainId.RINKEBY,
   SupportedChainId.GOERLI,
   SupportedChainId.KOVAN,
+  SupportedChainId.HARDHAT,
+  SupportedChainId.LOCAL_POS,
+  SupportedChainId.LOCAL_POW,
 ] as const
 
 export type SupportedTestnetChainId = typeof TESTNET_CHAIN_IDS[number]
@@ -51,6 +60,9 @@ export const L1_CHAIN_IDS = [
   SupportedChainId.RINKEBY,
   SupportedChainId.GOERLI,
   SupportedChainId.KOVAN,
+  SupportedChainId.HARDHAT,
+  SupportedChainId.LOCAL_POS,
+  SupportedChainId.LOCAL_POW,
 ] as const
 
 export type SupportedL1ChainId = typeof L1_CHAIN_IDS[number]

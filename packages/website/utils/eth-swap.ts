@@ -1,8 +1,6 @@
-import { Contract } from '@ethersproject/contracts'
 import { JsonRpcSigner, TransactionResponse } from '@ethersproject/providers'
-// @ts-ignore
-import abis from '@package/dump-pow-contracts/artifacts/contracts/EtherSwap.sol/EtherSwap.json'
-import config from '../config'
+import { getPoSSwapContract, getPoWSwapContract } from './swapContract'
+import { parseEther } from 'ethers/lib/utils'
 
 export async function commit(
   params: {
@@ -15,50 +13,23 @@ export async function commit(
   },
   signer: JsonRpcSigner
 ) {
-  console.log(
-    'coooontract',
-    config.ETH_POS_CONTRACT_ADDRESS,
-    abis.abi,
-    signer,
-    params.claimPeriodInSec,
-    params.hashedSecret,
-    params.initiatorEthAddress,
-    params.expectedAmount,
-    {
-      value: params.lockedEthAmount,
-    }
-  )
-  const ethSwapContract = new Contract(config.ETH_POS_CONTRACT_ADDRESS, abis.abi, signer)
+  const ethSwapContract = getPoWSwapContract(signer)
   const txResponse: TransactionResponse = await ethSwapContract.commit(
     params.claimPeriodInSec,
     params.hashedSecret,
-    params.expectedAmount,
+    parseEther(params.lockedEthAmount),
+    parseEther(params.expectedAmount),
     params.recipient,
     {
-      value: params.lockedEthAmount,
+      value: parseEther(params.lockedEthAmount),
       gasLimit: '1000000',
     }
   )
-
-  return txResponse
-}
-
-export async function addRecipient(
-  params: {
-    recipient: string
-    hashedSecret: string
-  },
-  signer: JsonRpcSigner
-) {
-  const { recipient, hashedSecret } = params
-  const ethSwapContract = new Contract(config.ETH_POS_CONTRACT_ADDRESS, abis.abi, signer)
-  const txResponse: TransactionResponse = await ethSwapContract.addRecipient(hashedSecret, recipient)
-
   return txResponse
 }
 
 export async function claim(secret: string, signer: JsonRpcSigner) {
-  const ethSwapContract = new Contract(config.ETH_POS_CONTRACT_ADDRESS, abis.abi, signer)
+  const ethSwapContract = getPoSSwapContract(signer)
   const txResponse: TransactionResponse = await ethSwapContract.secretProof(secret)
 
   return txResponse
