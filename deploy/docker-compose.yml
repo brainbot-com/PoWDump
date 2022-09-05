@@ -37,6 +37,7 @@ services:
     volumes:
       - ./data/deployments:/usr/app/packages/contracts/deployments
       - ./data/subgraph/build:/usr/app/packages/subgraph/build
+      - ./data/subgraph/generated:/usr/app/packages/subgraph/generated
     environment:
       GRAPH_URL: "http://graph-node:8020"
     depends_on:

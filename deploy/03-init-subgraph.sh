@@ -38,7 +38,9 @@ for network in pos pow; do
     --version-label $SUBGRAPH_VERSION \
     --node http://graph-node:8020/ \
     --ipfs http://ipfs:5001 \
-    $network --network $network
+    $network --network $network \
+    --network-file /usr/app/packages/contracts/deployments/graph_networks.json
+
 done
 
 $DC stop graph-cli
