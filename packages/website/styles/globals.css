@@ -55,44 +55,8 @@ html body {
 .background-image {
   min-height: 100vh;
   background-image: url(/assets/images/powdump_bg_trees.png);
-  /*background-attachment: fixed;*/
   background-size: auto 50rem;
   background-position: bottom left;
   background-repeat: repeat-x;
-  /*background-origin: padding-box, padding-box;*/
-  /*background-clip: border-box, border-box;*/
   background-attachment: fixed;
 }
-
-/*#root {*/
-/*  min-height: 100vh;*/
-/*}*/
-
-
-
-/*html,*/
-/*body {*/
-/*  padding: 0;*/
-/*  margin: 0;*/
-/*  font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,*/
-/*    Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;*/
-/*}*/
-
-/*a {*/
-/*  color: inherit;*/
-/*  text-decoration: none;*/
-/*}*/
-
-/** {*/
-/*  box-sizing: border-box;*/
-/*}*/
-
-/*@media (prefers-color-scheme: dark) {*/
-/*  html {*/
-/*    color-scheme: dark;*/
-/*  }*/
-/*  body {*/
-/*    color: white;*/
-/*    background: black;*/
-/*  }*/
-/*}*/

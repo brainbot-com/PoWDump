@@ -7,7 +7,13 @@ const Home: NextPage = () => {
 
     return (
         <Layout title={'PoWDump'}>
-            <DumpBox/>
+            <>
+                <div className={"container mx-auto"}>
+                    <div className={"max-w-md mx-auto"}>
+                        <DumpBox/>
+                    </div>
+                </div>
+            </>
         </Layout>
 
     )

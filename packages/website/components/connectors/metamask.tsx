@@ -57,10 +57,10 @@ const ConnectMetamask = () => {
   return (
     <div>
       {active && account ? (
-        <div className={'flex items-center rounded bg-zinc-900 text-white p-1'}>
+        <div className={'flex items-center rounded-lg bg-gray-500 text-white p-1'}>
           <div className={'px-2'}>{`${formattedBalance} ETH`}</div>
 
-          <Button className={'bg-zinc-800 font-bold text-white p-1 px-3'} onClick={onClickDisconnect}>
+          <Button className={'bg-rich-black font-bold text-white p-1 px-3 rounded-lg'} onClick={onClickDisconnect}>
             {formatAddress(account, 4)}
           </Button>
         </div>
