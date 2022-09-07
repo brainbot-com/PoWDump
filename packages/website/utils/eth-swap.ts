@@ -1,7 +1,7 @@
 import { Contract } from '@ethersproject/contracts'
 import { JsonRpcSigner, TransactionResponse } from '@ethersproject/providers'
 // @ts-ignore
-import abis from '@project/dump-pow-contracts/artifacts/contracts/EtherSwap.sol/EtherSwap.json'
+import abis from '@package/dump-pow-contracts/artifacts/contracts/EtherSwap.sol/EtherSwap.json'
 import config from '../config'
 
 export async function commit(

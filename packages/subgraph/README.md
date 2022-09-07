@@ -1,4 +1,4 @@
-# @project/dump-pow-subgraph
+# @package/dump-pow-subgraph
 
 This package contains the dumpPOW subgraph. The package is created with thegraph.
 

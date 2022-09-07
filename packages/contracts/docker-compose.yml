@@ -1,0 +1,51 @@
+version: '3'
+services:
+  node-pos-local:
+    image: trufflesuite/ganache:latest
+    volumes:
+      - data/ganache/pos:/data/ganache
+    ports:
+      - 8545:8545
+    command:
+      [
+      "--miner.blockTime",
+      "15",
+      "--wallet.mnemonic",
+      "${PRIVKEY_MNEMONIC}",
+      "--wallet.hdPath",
+      "m/44'/60'/0'/0",
+      "--wallet.defaultBalance",
+      "100000",
+      "--database.dbPath=/data/ganache",
+      "--chain.chainId",
+      "4242",
+      "--chain.networkId",
+      "4242",
+      "--server.host",
+      "0.0.0.0"
+      ]
+
+  node-pow-local:
+    image: trufflesuite/ganache:latest
+    volumes:
+      - data/ganache/pow:/data/ganache
+    ports:
+      - 8546:8545
+    command:
+      [
+      "--miner.blockTime",
+      "18",
+      "--wallet.mnemonic",
+      "${PRIVKEY_MNEMONIC}",
+      "--wallet.hdPath",
+      "m/44'/60'/0'/0",
+      "--wallet.defaultBalance",
+      "100000",
+      "--database.dbPath=/data/ganache",
+      "--chain.chainId",
+      "10011",
+      "--chain.networkId",
+      "10011",
+      "--server.host",
+      "0.0.0.0"
+      ]

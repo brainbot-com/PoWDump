@@ -1,0 +1,159 @@
+version: '3'
+services:
+  graph-node:
+    image: graphprotocol/graph-node
+    restart: always
+    depends_on:
+      - ipfs
+      - postgres
+      - node-pos
+      - node-pow
+    environment:
+      postgres_host: postgres
+      postgres_user: graph-node
+      postgres_pass: let-me-in
+      postgres_db: graph-node
+      ipfs: 'ipfs:5001'
+      ethereum: "pos:http://node-pos:8545 pow:http://node-pow:8545"
+      GRAPH_LOG: info
+    labels:
+      caddy: graph.staging.powdump.com
+      caddy.reverse_proxy: "{{upstreams 8000}}"
+
+  ipfs:
+    image: ipfs/kubo:v0.14.0
+    volumes:
+      - ./data/ipfs:/data/ipfs
+
+  graph-cli:
+    profiles: ["tools"]
+    build:
+      dockerfile: Dockerfile 
+      context: ..
+    entrypoint:
+      - npx
+      - graph
+    working_dir: /usr/app/packages/subgraph
+    volumes:
+      - ./data/deployments:/usr/app/packages/contracts/deployments
+      - ./data/subgraph/build:/usr/app/packages/subgraph/build
+      - ./data/subgraph/generated:/usr/app/packages/subgraph/generated
+    environment:
+      GRAPH_URL: "http://graph-node:8020"
+    depends_on:
+      - graph-node
+         
+  hardhat:
+    profiles: ["tools"]
+    build:
+      dockerfile: Dockerfile 
+      context: ..
+    working_dir: /usr/app/packages/contracts
+    entrypoint:
+      - npx
+      - hardhat
+    volumes:
+      - ./data/deployments:/usr/app/packages/contracts/deployments
+    environment:
+      POS_URL: "http://node-pos:8545"
+      POW_URL: "http://node-pow:8545"
+      PRIVKEY_MNEMONIC: "${PRIVKEY_MNEMONIC}"
+    depends_on:
+      - node-pos
+      - node-pow
+
+  node-pos:
+    image: trufflesuite/ganache:latest
+    restart: always
+    volumes:
+      - ./data/ganache/pos:/data/ganache
+    command:
+      [
+      "--miner.blockTime",
+      "15",
+      "--wallet.mnemonic",
+      "${PRIVKEY_MNEMONIC}",
+      "--wallet.hdPath",
+      "m/44'/60'/0'/0",
+      "--wallet.defaultBalance",
+      "100000",
+      "--database.dbPath=/data/ganache",
+      "--chain.chainId",
+      "4242",
+      "--chain.networkId",
+      "4242",
+      "--server.host",
+      "0.0.0.0"
+      ]
+    labels:
+      caddy: pos.staging.powdump.com
+      caddy.reverse_proxy: "{{upstreams 8545}}"
+
+  node-pow:
+    image: trufflesuite/ganache:latest
+    restart: always
+    volumes:
+      - ./data/ganache/pow:/data/ganache
+    command:
+      [
+      "--miner.blockTime",
+      "18",
+      "--wallet.mnemonic",
+      "${PRIVKEY_MNEMONIC}",
+      "--wallet.hdPath",
+      "m/44'/60'/0'/0",
+      "--wallet.defaultBalance",
+      "100000",
+      "--database.dbPath=/data/ganache",
+      "--chain.chainId",
+      "10011",
+      "--chain.networkId",
+      "10011",
+      "--server.host",
+      "0.0.0.0"
+      ]
+    labels:
+      caddy: pow.staging.powdump.com
+      caddy.reverse_proxy: "{{upstreams 8545}}"
+
+  # TODO the Dockerfile is not building properly yet
+  # webapp:
+  #   build:
+  #     dockerfile: Dockerfile 
+  #     context: ../packages/website/
+  #   labels:
+  #     caddy: staging.powdump.com
+  #     caddy.reverse_proxy: "{{upstreams 3000}}"
+
+  postgres:
+    image: postgres
+    restart: always
+    command:
+      [
+        "postgres",
+        "-cshared_preload_libraries=pg_stat_statements"
+      ]
+    environment:
+      POSTGRES_USER: graph-node
+      POSTGRES_PASSWORD: let-me-in
+      POSTGRES_DB: graph-node
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: pg_isready
+
+  caddy:
+    image: lucaslorentz/caddy-docker-proxy:ci-alpine
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./data/caddy:/data
+    environment:
+      CADDY_INGRESS_NETWORKS: powdump_default
+    labels:
+      # TODO remove when verified
+      caddy.acme_ca: "https://acme-staging-v02.api.letsencrypt.org/directory"
+      caddy.email: "devops@brainbot.com"

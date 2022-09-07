@@ -5,6 +5,8 @@ coverage.json
 typechain
 typechain-types
 
+.tool-versions
+
 #Hardhat files
 cache
 artifacts
@@ -12,7 +14,13 @@ artifacts
 yarn-error.log
 lerna-debug.log
 
+# Contracts files
+/packages/contracts/data
+
 # Subgraph files
 /packages/subgraph/data
 /packages/subgraph/build
 /packages/subgraph/generated
+
+# Deployment files
+/deploy/data/
