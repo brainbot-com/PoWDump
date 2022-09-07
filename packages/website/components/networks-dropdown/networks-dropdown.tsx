@@ -67,7 +67,7 @@ export default function NetworksDropdown() {
               <ChevronDownIcon
                 className={classNames(
                   open ? 'text-gray' : 'text-gray-400',
-                  'ml-2 h-5 w-5 group-hover:text-gray
+                  'ml-2 h-5 w-5 group-hover:text-gray'
                 )}
                 aria-hidden="true"
               />

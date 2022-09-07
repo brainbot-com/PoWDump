@@ -4,6 +4,7 @@ import React, {useEffect, useState} from 'react'
 import {gql, request} from 'graphql-request'
 import {config, ZERO_ADDRESS} from '../../config'
 import type {Block} from "@ethersproject/abstract-provider";
+import {Status} from "./status";
 
 const query = gql`
     query getCommitment($id: String!) {
@@ -25,7 +26,7 @@ export const SearchRecipient = ({
                                     onRecipient
                                 }: { swapId: string; onRecipient: (recipient: string) => void }) => {
     const {provider} = useWeb3React<Web3Provider>()
-    const [recipient, setRecipient] = useState<string | undefined>(undefined)
+    const [recipient, setRecipient] = useState<string | undefined>()
 
     useEffect(() => {
         if (provider) {
@@ -39,8 +40,6 @@ export const SearchRecipient = ({
                         if (swapCommitment.recipient !== ZERO_ADDRESS) {
                             onRecipient(swapCommitment.recipient)
                             setRecipient(swapCommitment.recipient)
-
-
                         }
                     }
                 }
@@ -52,10 +51,10 @@ export const SearchRecipient = ({
                 provider.on('block', onBlockListener)
             }
         }
-    }, [provider, recipient])
+    }, [provider, recipient, swapId, onRecipient])
 
     if (recipient) {
-        return <div>Counterparty: {recipient} commited to the swap. Waiting to find their swap on the PoS chain.</div>
+        return <Status status={`Counterparty: ${recipient} committed to the swap. Waiting to find their swap on the PoS chain.`} />
     }
-    return <div>Searching for counterparty to match the dump on Eth pos</div>
+    return <Status status={"Searching for counterparty to match the dump"} />
 }

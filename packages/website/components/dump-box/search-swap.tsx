@@ -9,6 +9,10 @@ import {switchChain} from '../../utils/switchChain'
 import {SupportedChainId} from '../../constants/chains'
 import type {Block} from "@ethersproject/abstract-provider";
 import config from "../../config";
+import {STATUS} from "web3modal/dist/providers/injected";
+import {Status} from "./status";
+import {formatAddress} from "../../utils/helpers";
+import {CopyToClipboard} from "./copy-to-clipboard";
 
 const posQuery = gql`
     query getSwap($recipient: String!, $hashedSecret: String!, $initiator: String!) {
@@ -31,15 +35,22 @@ type Props = {
     initiator: string,
     secret: string,
     expectedPoSAmount: string,
+    onSwapFound: (swap: SwapType) => void
 }
-type SwapType = {
+export type SwapType = {
     id: string,
-    value: string,
+    endTimeStamp: string
+    expectedAmount: string
+    hashedSecret: string
+    recipient: string
+    proof: string
+    initiator: string
+    refunded: boolean
+    value: string
 }
-export const SearchSwap = ({recipient, initiator, secret, expectedPoSAmount}: Props) => {
-    const {account, connector, provider, chainId} = useWeb3React<Web3Provider>()
-    const [foundSwap, setFoundSwap] = useState<undefined | SwapType>(undefined)
-    console.log('provider', provider, connector, chainId)
+export const SearchSwap = ({recipient, initiator, secret, expectedPoSAmount, onSwapFound}: Props) => {
+    const {provider} = useWeb3React<Web3Provider>()
+    const [foundSwap, setFoundSwap] = useState<undefined | SwapType>()
     const hashedSecret = keccak256(secret)
     useEffect(() => {
         if (provider) {
@@ -50,17 +61,15 @@ export const SearchSwap = ({recipient, initiator, secret, expectedPoSAmount}: Pr
                     initiator: String(initiator),
                 })
 
-
                 if (data) {
                     const {swapCommitments} = data
 
                     if (swapCommitments.length === 1) {
-                        const {id, value} = swapCommitments[0]
+                        const {value} = swapCommitments[0]
 
                         if (parseUnits(value, 'wei').eq(parseEther(expectedPoSAmount))) {
-                            console.log('swaps appear to have same values')
-
                             setFoundSwap(swapCommitments[0])
+                            onSwapFound(swapCommitments[0])
                         }
                     }
                 }
@@ -72,54 +81,17 @@ export const SearchSwap = ({recipient, initiator, secret, expectedPoSAmount}: Pr
                 provider.on('block', onBlockListener)
             }
         }
-    }, [provider, foundSwap])
+    }, [provider, foundSwap, recipient, hashedSecret, initiator, expectedPoSAmount, onSwapFound])
 
     if (foundSwap) {
-        return (
-            <div>
-                Found swap with id: {foundSwap.id} and value: {foundSwap.value}
-                Reveal secret on Pos chain to claim funds.
-                {chainId === SupportedChainId.LOCAL_POW && (
-                    <>
-                        You need to switch to the Pos chain to reveal the secret.
-                        <button
-                            onClick={async () => {
-                                // TODO: switch properly (also the UI)
-                                try {
-                                    await switchChain(connector, SupportedChainId.LOCAL_POS)
-                                } catch (e) {
-                                    console.log('You need to switch the chain', e)
-                                }
-
-                            }}
-                        >
-                            Switch Chain
-                        </button>
-                    </>
-                )}
-                {chainId === SupportedChainId.LOCAL_POS && (
-                    <>
-                        <button
-                            onClick={async () => {
-
-
-                                try {
-                                    const signer = provider?.getSigner()
-                                    if (signer) {
-                                        const contract = getPoSSwapContract(signer)
-                                        await contract.claim(foundSwap.id, secret)
-                                    }
-                                } catch (e) {
-                                    console.log('Something went wrong when signing', e)
-                                }
-                            }}
-                        >
-                            Reveal secret
-                        </button>
-                    </>
-                )}
-            </div>
-        )
+        return <Status status={`Swap found.`}/>
     }
-    return <div>no swap found yet.</div>
+
+    return <Status status={(
+        <span>
+            Searching for commitment from <span
+            className={"font-bold"}>{formatAddress(initiator)}<CopyToClipboard text={initiator}/></span> on the Ethereum
+            chain.
+        </span>
+    )}/>
 }

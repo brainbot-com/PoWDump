@@ -2,14 +2,15 @@ import React from 'react'
 
 import NetworksDropdown from '../networks-dropdown/networks-dropdown'
 import { ConnectWallet } from '../wallet/connect-wallet'
-import PowDumpLogo from '../../public/assets/images/POWdump_horizontalbwlogo.png';
+// @ts-ignore
+import PowDumpLogo from '../../public/assets/images/POWdump_horizontalbwlogo.png'
 
 function NavBar() {
   return (
-    <nav className={"bg-rich-black"}>
-      <div className="container mx-auto h-20 flex flex-row items-center justify-between">
+    <nav className={'bg-rich-black'}>
+      <div className="container max-w-4xl mx-auto h-20 flex flex-row items-center justify-between">
         <div className="font-semibold text-white">
-          <img src={PowDumpLogo} style={{height:"60px"}}/>
+          <img src={PowDumpLogo} alt="logo" style={{ height: '60px' }} />
         </div>
 
         <div className="flex-1 flex justify-end items-center">
