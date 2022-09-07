@@ -35,8 +35,8 @@ contract EtherSwap {
         feePerMillion = _feePerMillion;
     }
 
-    function commit(uint64 _lockTimeSec, bytes32 _hashedSecret, uint256 _payout, uint256 _expectedAmount, address payable _recipient) external payable {
-        require(msg.value > 0, "Ether is required");
+    function commit(uint64 _swapEndTimestamp, bytes32 _hashedSecret, uint256 _payout, uint256 _expectedAmount, address payable _recipient) public payable {
+        require(block.timestamp < _swapEndTimestamp, "Swap end timestamp must be in the future");
 
         uint256 fee = feeFromSwapValue(_payout);
         require(msg.value == fee + _payout, "Ether value does not match payout + fee");
@@ -45,7 +45,7 @@ contract EtherSwap {
         swap.hashedSecret = _hashedSecret;
         swap.initiator = payable(msg.sender);
         swap.recipient = _recipient;
-        swap.endTimeStamp = uint64(block.timestamp + _lockTimeSec);
+        swap.endTimeStamp = _swapEndTimestamp;
         swap.changeRecipientTimestamp = 0;
         swap.value = _payout;
         swap.expectedAmount = _expectedAmount;
@@ -59,6 +59,11 @@ contract EtherSwap {
         emit Commit(msg.sender, _recipient, _payout, _expectedAmount, swap.endTimeStamp, _hashedSecret, numberOfSwaps);
 
         numberOfSwaps = numberOfSwaps + 1;
+    }
+
+    function commit(uint64 _transactionExpiryTime, uint64 _lockTimeSec, bytes32 _hashedSecret, uint256 _payout, uint256 _expectedAmount, address payable _recipient) external payable {
+        require(block.timestamp < _transactionExpiryTime, "Transaction no longer valid");
+        commit(uint64(block.timestamp) + _lockTimeSec, _hashedSecret, _payout, _expectedAmount, _recipient);
     }
 
     function changeRecipient(uint32 _swapId, address payable _recipient) external {

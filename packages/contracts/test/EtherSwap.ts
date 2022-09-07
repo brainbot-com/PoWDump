@@ -13,6 +13,7 @@ describe("EtherSwap", function () {
   const feePerMillion = 1000
 
   const lockTime = 365 * 24 * 60 * 60;
+  let transactionExpiry: number;
   const secret = randomBytes(32)
   const hashedSecret = ethers.utils.keccak256(secret)
   const expectedAmount = 1
@@ -25,6 +26,7 @@ describe("EtherSwap", function () {
   before(async function() {
     recipient = (await ethers.getSigners())[1].address
     txSender = (await ethers.getSigners())[0].address
+    transactionExpiry = (await ethers.provider.getBlock("latest")).timestamp * 100
   });
 
   // We define a fixture to reuse the same setup in every test.
@@ -43,7 +45,7 @@ describe("EtherSwap", function () {
   async function deployCommit() {
     const etherSwap = await deployEtherSwap()
 
-    await etherSwap.commit(lockTime, hashedSecret, swapValue, expectedAmount, ethers.constants.AddressZero, {"value": swapValue})
+    await etherSwap['commit(uint64,uint64,bytes32,uint256,uint256,address)'](transactionExpiry, lockTime, hashedSecret, swapValue, expectedAmount, ethers.constants.AddressZero, {"value": swapValue})
 
     return {etherSwap, secret};
   }
@@ -51,16 +53,17 @@ describe("EtherSwap", function () {
   async function deployCommitWithFees() {
     const etherSwap = await deployEtherSwapWithFees()
 
-    await etherSwap.commit(lockTime, hashedSecret, swapValue, expectedAmount, recipient, {"value": msgValue})
+    await etherSwap['commit(uint64,uint64,bytes32,uint256,uint256,address)'](transactionExpiry, lockTime, hashedSecret, swapValue, expectedAmount, recipient, {"value": msgValue})
 
     return etherSwap;
   }
 
   describe("Commit", function () {
-    it("Should store proper commit", async function () {
+    it("Should commit with transaction expiry time and swap lock time", async function () {
       const etherSwap = await loadFixture(deployEtherSwap);
 
-      await etherSwap.commit(lockTime, hashedSecret, swapValue, expectedAmount, ethers.constants.AddressZero, {"value": swapValue})
+      await etherSwap['commit(uint64,uint64,bytes32,uint256,uint256,address)'](
+        transactionExpiry, lockTime, hashedSecret, swapValue, expectedAmount, ethers.constants.AddressZero, {"value": swapValue})
 
       const blockTime = (await ethers.provider.getBlock("latest")).timestamp
 
@@ -76,10 +79,30 @@ describe("EtherSwap", function () {
       expect(await etherSwap.provider.getBalance(etherSwap.address)).to.equal(swapValue)
     });
 
+    it("Should commit with swap end timestamp", async function () {
+      const etherSwap = await loadFixture(deployEtherSwap);
+
+      const swapExpiryTime = (await ethers.provider.getBlock("latest")).timestamp * 2
+
+      await etherSwap['commit(uint64,bytes32,uint256,uint256,address)'](
+        swapExpiryTime, hashedSecret, swapValue, expectedAmount, ethers.constants.AddressZero, {"value": swapValue})
+
+      const commit = await etherSwap.swaps(0)
+      expect(commit.hashedSecret).to.equal(ethers.utils.hexlify(hashedSecret))
+      expect(commit.initiator).to.equal(txSender)
+      expect(commit.endTimeStamp).to.equal(swapExpiryTime)
+      expect(commit.recipient).to.equal(ethers.constants.AddressZero)
+      expect(commit.changeRecipientTimestamp).to.equal(0)
+      expect(commit.value).to.equal(swapValue)
+      expect(commit.expectedAmount).to.equal(expectedAmount)
+
+      expect(await etherSwap.provider.getBalance(etherSwap.address)).to.equal(swapValue)
+    });
+
     it("Should store proper commit with recipient", async function () {
       const etherSwap = await loadFixture(deployEtherSwap);
 
-      await etherSwap.commit(lockTime, hashedSecret, swapValue, expectedAmount, recipient, {"value": swapValue})
+      await etherSwap['commit(uint64,uint64,bytes32,uint256,uint256,address)'](transactionExpiry, lockTime, hashedSecret, swapValue, expectedAmount, recipient, {"value": swapValue})
 
       const blockTime = (await ethers.provider.getBlock("latest")).timestamp
       const maxUint64 = BigNumber.from(2).pow(64).sub(1)
@@ -99,10 +122,20 @@ describe("EtherSwap", function () {
     it("Should emit a Commit event", async function () {
       const etherSwap = await loadFixture(deployEtherSwap);
 
-      await expect(etherSwap.commit(lockTime, hashedSecret, swapValue, expectedAmount, recipient, {"value": swapValue})).to.emit(
+      await expect(etherSwap['commit(uint64,uint64,bytes32,uint256,uint256,address)'](transactionExpiry, lockTime, hashedSecret, swapValue, expectedAmount, recipient, {"value": swapValue})).to.emit(
           etherSwap, "Commit"
       ).withArgs(txSender, recipient, swapValue, expectedAmount, (await ethers.provider.getBlock("latest")).timestamp + lockTime, hashedSecret, 0)
     });
+
+    it("Should not commit expired transaction", async function () {
+      const etherSwap = await loadFixture(deployEtherSwap);
+
+      const blockTime = (await ethers.provider.getBlock("latest")).timestamp
+
+      await expect(etherSwap['commit(uint64,uint64,bytes32,uint256,uint256,address)'](
+        blockTime - 1, lockTime, hashedSecret, swapValue, expectedAmount, ethers.constants.AddressZero, {"value": swapValue}))
+        .to.be.revertedWith("Transaction no longer valid")
+    })
   });
 
   describe("Change recipient", function () {
@@ -261,7 +294,7 @@ describe("EtherSwap", function () {
     it("Should collect fee on commit", async function () {
       const etherSwap = await loadFixture(deployEtherSwapWithFees);
 
-      await etherSwap.commit(lockTime, hashedSecret, swapValue, expectedAmount, recipient, {"value": msgValue})
+      await etherSwap['commit(uint64,uint64,bytes32,uint256,uint256,address)'](transactionExpiry, lockTime, hashedSecret, swapValue, expectedAmount, recipient, {"value": msgValue})
 
       const commit = await etherSwap.swaps(0)
       expect(commit.value).to.equal(swapValue)
@@ -272,9 +305,9 @@ describe("EtherSwap", function () {
     it("Should refuse commit with wrong fees", async function () {
       const etherSwap = await loadFixture(deployEtherSwapWithFees);
 
-      await expect(etherSwap.commit(lockTime, hashedSecret, swapValue, expectedAmount, recipient, {"value": msgValue + 1}))
+      await expect(etherSwap['commit(uint64,uint64,bytes32,uint256,uint256,address)'](transactionExpiry, lockTime, hashedSecret, swapValue, expectedAmount, recipient, {"value": msgValue + 1}))
         .to.be.revertedWith("Ether value does not match payout + fee")
-      await expect(etherSwap.commit(lockTime, hashedSecret, swapValue, expectedAmount, recipient, {"value": msgValue - 1}))
+      await expect(etherSwap['commit(uint64,uint64,bytes32,uint256,uint256,address)'](transactionExpiry, lockTime, hashedSecret, swapValue, expectedAmount, recipient, {"value": msgValue - 1}))
         .to.be.revertedWith("Ether value does not match payout + fee")
     });
 
