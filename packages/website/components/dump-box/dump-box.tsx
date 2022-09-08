@@ -248,37 +248,6 @@ function DumpBox() {
                 </Button>
 
             </div>
-
-            {commitTxHash && (
-                <>
-                    <div className="mt-4 text-center break-words" style={{wordBreak: 'break-word'}}>
-                        {/* eslint-disable-next-line react/no-unescaped-entities */}
-                        Write down your secret: <strong>{stateSecret}</strong>. You'll need it when you want to
-                        claim your Eth.
-                    </div>
-                    <>
-                        <div className="text-xs" style={{wordBreak: 'break-word'}}>
-                            The tx was signed. You can give the following link to the counterparty. <br/>
-                            {shareLink}
-                        </div>
-                    </>
-                    <Button buttonType="primary" onClick={handleClickCopy} fullWidth>
-                        Copy Link
-                    </Button>
-                    <div className="bg-green-100 p-4 text-green-700 w-full text-center">
-                        Successfully committed!{' '}
-                        <a
-                            className="underline"
-                            href={`https://goerli.etherscan.io/tx/${commitTxHash}`}
-                            target="_blank"
-                            rel="noreferrer"
-                        >
-                            View on Etherscan
-                        </a>
-                    </div>
-                </>
-            )}
-
         </DumpBoxLayout>
     )
 }
