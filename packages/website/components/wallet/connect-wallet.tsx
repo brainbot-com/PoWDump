@@ -35,7 +35,7 @@ export function ConnectWallet() {
           <button
             type="button"
             onClick={openModal}
-            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            className="inline-flex items-center px-4 py-2 border rounded-lg border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-green hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
           >
             Connect wallet
           </button>
@@ -55,6 +55,7 @@ export function ConnectWallet() {
 
               <div className="fixed inset-0 overflow-y-auto">
                 <div className="flex min-h-full items-center justify-center p-4 text-center">
+                  <div className={"absolute bg-black h-full w-full opacity-90"}></div>
                   <Transition.Child
                     as={Fragment}
                     enter="ease-out duration-300"
@@ -64,7 +65,7 @@ export function ConnectWallet() {
                     leaveFrom="opacity-100 scale-100"
                     leaveTo="opacity-0 scale-95"
                   >
-                    <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-gray-800 p-6 text-left align-middle shadow-xl transition-all">
+                    <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-gray-500 p-6 text-left align-middle shadow-xl transition-all">
                       <div className={'pb-4 flex items-center'}>
                         <div className="hidden sm:block absolute top-0 right-0 pt-5 pr-5">
                           <button

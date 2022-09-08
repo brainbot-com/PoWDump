@@ -12,9 +12,9 @@ function Button(
   const { buttonType, fullWidth, className, ...rest } = props
 
   const buttonTypes = {
-    primary: 'px-4 py-2 font-semibold rounded-lg bg-blue-600 text-white',
+    primary: 'px-4 py-2 font-semibold rounded-lg bg-green text-black',
     secondary: 'px-4 py-2 font-semibold rounded-lg text-black',
-    disabled: 'px-4 py-2 font-semibold rounded-lg bg-gray-500 text-white',
+    disabled: 'px-4 py-2 font-semibold rounded-lg bg-[#454041] text-gray',
   }
   return (
     <button
@@ -22,12 +22,12 @@ function Button(
       className={`
        
         ${buttonType && buttonTypes[buttonType] ? buttonTypes[buttonType] : ''}
-        ${props.disabled ? 'opacity-50' : ''}
+        ${props.disabled ? 'opacity-90' : ''}
         ${fullWidth ? 'w-full' : ''}
         ${className ? className : ''}
       `}
     >
-      {props.children}
+        {props.children}
     </button>
   )
 }

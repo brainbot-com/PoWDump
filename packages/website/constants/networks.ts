@@ -18,4 +18,7 @@ export const RPC_URLS: { [key in SupportedChainId]: string } = {
   [SupportedChainId.ROPSTEN]: `https://ropsten.infura.io/v3/${INFURA_KEY}`,
   [SupportedChainId.GOERLI]: `https://goerli.infura.io/v3/${INFURA_KEY}`,
   [SupportedChainId.KOVAN]: `https://kovan.infura.io/v3/${INFURA_KEY}`,
+  [SupportedChainId.HARDHAT]: `http://hardhat.local:8545`,
+  [SupportedChainId.LOCAL_POS]: `http://localhost:8545`,
+  [SupportedChainId.LOCAL_POW]: `http://localhost:8546`,
 }

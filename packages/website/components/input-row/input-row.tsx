@@ -39,11 +39,11 @@ export function InputRow(props: Props) {
 
   return (
     <div className="w-full">
-      <div className="flex flex-col rounded-lg dark:bg-zinc-800 pt-2">
+      <div className="flex flex-col rounded-lg dark:bg-brown-orange pt-2">
         <div className="flex flex-row mt-2">
-          <div className={'flex-1 items-center p-2'}>
+          <div className={'flex-1 '}>
             <input
-              className="w-full appearance-none outline-none dark:bg-zinc-800 text-2xl"
+              className="w-full  appearance-none outline-none dark:bg-brown-orange text-2xl text-white ml-4 mt-2"
               onChange={event => {
                 enforcer(event.target.value.replace(/,/g, '.'))
               }}
@@ -60,7 +60,7 @@ export function InputRow(props: Props) {
 
           {props.append && (
             <div className={'justify-center items-center flex mr-3 p-1'}>
-              <span className={'bg-zinc-700 rounded rounded-lg px-2 py-1'}>{props.append}</span>
+              <span className={'px-2 py-1'}>{props.append}</span>
             </div>
           )}
         </div>

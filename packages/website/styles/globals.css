@@ -2,40 +2,61 @@
 @tailwind components;
 @tailwind utilities;
 
-/*html body {*/
-/*  margin: 0px;*/
-/*  min-height: 100vh;*/
-/*}*/
 
-/*#root {*/
-/*  min-height: 100vh;*/
-/*}*/
+@layer base {
+  @font-face {
+    font-family: "Archivo";
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url("/fonts/Archivo-Regular.ttf");
+  }
 
+  @font-face {
+    font-family: "Archivo";
+    font-style: normal;
+    font-weight: 500;
+    font-display: swap;
+    src: url("/fonts/Archivo-Medium.ttf");
+  }
 
+  @font-face {
+    font-family: "Archivo";
+    font-style: normal;
+    font-weight: 600;
+    font-display: swap;
+    src: url("/fonts/Archivo-SemiBold.ttf");
+  }
 
-/*html,*/
-/*body {*/
-/*  padding: 0;*/
-/*  margin: 0;*/
-/*  font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,*/
-/*    Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;*/
-/*}*/
+  @font-face {
+    font-family: "Archivo";
+    font-style: normal;
+    font-weight: 700;
+    font-display: swap;
+    src: url("/fonts/Archivo-Bold.ttf");
+  }
 
-/*a {*/
-/*  color: inherit;*/
-/*  text-decoration: none;*/
-/*}*/
+  html {
+    font-family: Archivo, system-ui, sans-serif;
+    font-size: 1rem;
+  }
+}
 
-/** {*/
-/*  box-sizing: border-box;*/
-/*}*/
+html body {
+  background-image: url(/assets/images/powdump_bg_sunset.png);
+  background-size: cover, auto;
+  background-position: center center, 0% 0%;
+  background-repeat: no-repeat, repeat;
+  background-origin: padding-box, padding-box;
+  background-clip: border-box, border-box;
+  background-attachment: fixed;
+}
 
-/*@media (prefers-color-scheme: dark) {*/
-/*  html {*/
-/*    color-scheme: dark;*/
-/*  }*/
-/*  body {*/
-/*    color: white;*/
-/*    background: black;*/
-/*  }*/
-/*}*/
+.background-image {
+  min-height: 100vh;
+  background-image: url(/assets/images/powdump_bg_trees.png);
+  background-size: auto 50rem;
+  background-position: bottom left;
+  background-repeat: repeat-x;
+  background-attachment: fixed;
+}

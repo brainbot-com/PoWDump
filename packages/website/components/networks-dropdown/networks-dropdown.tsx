@@ -55,10 +55,10 @@ export default function NetworksDropdown() {
           {!unsupportedNetwork && (
             <Popover.Button
               className={classNames(
-                open ? 'text-gray-500' : 'text-gray-300',
-                'group bg-zinc-900 rounded-lg inline-flex items-center text-base',
-                ' hover:text-gray-900 focus:outline-none focus:ring-0 ',
-                'focus:ring-offset-0 focus:ring-indigo-500 hover:text-gray-500',
+                open ? 'text-gray' : 'text-white',
+                'group bg-gray-500 rounded-lg inline-flex items-center text-base',
+                'focus:outline-none focus:ring-0 ',
+                'focus:ring-offset-0 focus:ring-indigo-500 hover:text-gray',
                 'p-2'
               )}
             >
@@ -66,8 +66,8 @@ export default function NetworksDropdown() {
               {selectedNetwork && <span className={'ml-1'}>{selectedNetwork.nativeCurrency.name}</span>}
               <ChevronDownIcon
                 className={classNames(
-                  open ? 'text-gray-600' : 'text-gray-400',
-                  'ml-2 h-5 w-5 group-hover:text-gray-500'
+                  open ? 'text-gray' : 'text-gray-400',
+                  'ml-2 h-5 w-5 group-hover:text-gray'
                 )}
                 aria-hidden="true"
               />
