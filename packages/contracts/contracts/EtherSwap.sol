@@ -37,6 +37,8 @@ contract EtherSwap {
 
     function commit(uint64 _swapEndTimestamp, bytes32 _hashedSecret, uint256 _payout, uint256 _expectedAmount, address payable _recipient) public payable {
         require(block.timestamp < _swapEndTimestamp, "Swap end timestamp must be in the future");
+        require(_payout != 0, "Cannot commit to 0 payout");
+        require(_expectedAmount != 0, "Cannot commit to 0 expected amount");
 
         uint256 fee = feeFromSwapValue(_payout);
         require(msg.value == fee + _payout, "Ether value does not match payout + fee");
