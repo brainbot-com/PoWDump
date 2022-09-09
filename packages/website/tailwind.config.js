@@ -4,7 +4,6 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        'rich-black': '#150201',
         'white': '#FAFAFA',
         'gray': '#bbbabe',
         'gray-500': '#454041',
@@ -13,10 +12,16 @@ module.exports = {
         'pink': '#f99585',
         'green': '#19dd55',
         'brown-orange': '#773116',
-
+        'rich-black': {
+          lightest: "#454041",
+          lighter: "#201010",
+          DEFAULT: "#150201",
+        }
       },
       borderRadius: {
         lg: "30px",
+        md: "20px",
+        sm: "10px",
       }
     },
   },

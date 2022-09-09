@@ -34,8 +34,12 @@ type Store = {
   pendingCommitments: { [commitmentId: string]: Commitment }
   setPendingCommitments: (newPendingCommitment: Commitment) => void
   removePendingCommitment: (commitmentId: string) => void
-  price: number
-  setPrice: (newPrice: number) => void
+  suggestedPrice: number
+  setSuggestedPrice: (newPrice: number) => void
+  priceFromAPI: number,
+  setPriceFromAPI: (newPriceFromAPI: number) => void
+  userPrice: string
+  setUserPrice: (newUserPrice: string) => void
 }
 
 export const useStore = create<Store>()(
@@ -69,13 +73,18 @@ export const useStore = create<Store>()(
             delete pendingCommitments[commitmentId]
             return { pendingCommitments }
           }),
-          price: 0,
-          setPrice: (newPrice: number) => set({ price: newPrice }),
+        suggestedPrice: 0,
+        setSuggestedPrice: (newPrice: number) => set({ suggestedPrice: newPrice }),
+        priceFromAPI: 0,
+        setPriceFromAPI: (newPriceFromAPI: number) => set({ priceFromAPI: newPriceFromAPI }),
+        userPrice: "",
+        setUserPrice: (newPrice: string) => set({ userPrice: newPrice }),
       }),
-      { name: 'swapState', partialize: (state) =>
-              Object.fromEntries(
-                  Object.entries(state).filter(([key]) => !['notification'].includes(key))
-              ), }
+      {
+        name: 'swapState',
+        partialize: state =>
+          Object.fromEntries(Object.entries(state).filter(([key]) => !['notification'].includes(key))),
+      }
     )
   )
 )

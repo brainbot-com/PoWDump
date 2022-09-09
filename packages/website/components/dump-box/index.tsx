@@ -9,3 +9,4 @@ export {CopyToClipboard} from "./copy-to-clipboard";
 export {CurrencyBadge} from "./currency-badge";
 export {DumpBoxLayout} from "./dump-box-layout";
 export {DealStatus} from "./deal-status";
+export {PriceRow} from "./price-row";

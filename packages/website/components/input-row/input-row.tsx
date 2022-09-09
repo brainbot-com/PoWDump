@@ -1,24 +1,11 @@
 import React from 'react'
+import { CustomDecimalInput, InputProps } from './custom-decimal-input'
 
-type Props = {
-  type: string
-  id: string
-  value: string
-  placeholder: string
+type Props = InputProps & {
   append: React.ReactNode
-  onChangeInputValue: (value: string) => void
-  pattern?: string
 }
-
-export function escapeRegExp(string: string): string {
-  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') // $& means the whole matched string
-}
-
-const inputRegex = RegExp(`^\\d*(?:\\\\[.])?\\d*$`) // match escaped "." characters via in a non-capturing group
 
 export function InputRow(props: Props) {
-  // const pattern = props.pattern ? `pattern=${props.pattern}` : "";
-
   let inputProps = {
     type: props.type,
     id: props.id,
@@ -31,29 +18,16 @@ export function InputRow(props: Props) {
     inputProps.pattern = props.pattern
   }
 
-  const enforcer = (nextUserInput: string) => {
-    if (nextUserInput === '' || inputRegex.test(escapeRegExp(nextUserInput))) {
-      props.onChangeInputValue(nextUserInput)
-    }
-  }
-
   return (
     <div className="w-full">
-      <div className="flex flex-col rounded-lg dark:bg-brown-orange pt-2">
+      <div className="group flex-col rounded-md dark:bg-brown-orange pt-2 hover:bg-sky-700">
         <div className="flex flex-row mt-2">
           <div className={'flex-1 '}>
-            <input
-              className="w-full  appearance-none outline-none dark:bg-brown-orange text-2xl text-white ml-4 mt-2"
-              onChange={event => {
-                enforcer(event.target.value.replace(/,/g, '.'))
+            <CustomDecimalInput
+              className="w-full  appearance-none outline-none dark:bg-brown-orange text-2xl text-white ml-4 mt-2 group-hover:text-white"
+              onChangeInputValue={value => {
+                props.onChangeInputValue(value)
               }}
-              // universal input options
-              inputMode="decimal"
-              autoComplete="off"
-              autoCorrect="off"
-              minLength={1}
-              maxLength={79}
-              spellCheck="false"
               {...inputProps}
             />
           </div>
