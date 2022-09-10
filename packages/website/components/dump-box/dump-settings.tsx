@@ -1,12 +1,11 @@
 import React, { Fragment, useState } from 'react'
 import { Popover, Transition } from '@headlessui/react'
 import { classNames } from '../../utils/tailwind'
-import { CogIcon } from '@heroicons/react/solid'
 import { usePrice } from '../../hooks/use-price'
 import { useStore } from '../../store'
 import { CustomDecimalInput } from '../input-row'
 import { SuggestedPriceTooltipHelp } from './suggested-price-tooltip-help'
-import { QuestionMarkCircleIcon } from '@heroicons/react/outline'
+import { Cog8ToothIcon as CogIcon, QuestionMarkCircleIcon } from '@heroicons/react/24/solid'
 
 type Props = {
   onSettingUpdate: (setting: string, value: string) => void
