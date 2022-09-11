@@ -4,12 +4,14 @@
   "private": true,
   "scripts": {},
   "dependencies": {
+    "better-queue": "^3.8.11",
     "ethers": "^5.6.9",
     "yargs": "^17.5.1"
   },
   "devDependencies": {
     "@types/node": "^18.7.6",
     "@types/yargs": "^17.0.11",
+    "@types/better-queue": "^3.8.3",
     "ts-node": "^10.9.1",
     "typescript": "^4.7.4"
   }
