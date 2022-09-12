@@ -1,4 +1,4 @@
-import {ClipboardCopyIcon} from "@heroicons/react/outline";
+import {ClipboardDocumentIcon} from "@heroicons/react/24/outline";
 import React from "react";
 
 export const CopyToClipboard = ({text}: { text: string }) => {
@@ -7,6 +7,6 @@ export const CopyToClipboard = ({text}: { text: string }) => {
     }
 
     return (
-        <ClipboardCopyIcon className={"h-5 w-5 text-black cursor-pointer inline-block"} onClick={handleClickCopy}/>
+        <ClipboardDocumentIcon className={"h-5 w-5 text-black cursor-pointer inline-block"} onClick={handleClickCopy}/>
     )
 }

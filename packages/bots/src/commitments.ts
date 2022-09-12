@@ -58,6 +58,16 @@ const getSwapFromSourceContract = async (id: string) => {
   return sourceContract.swaps(id);
 };
 
+
+export const matchCommitmentBySwapId = async (id: string) => {
+    const swap = await getSwapFromSourceContract(id);
+    const swapCommitment = {
+        id,
+        swap
+    };
+    return match(swapCommitment);
+}
+
 export const matchCommitmentTx = async (
   transactionWithSwapCommitment: string
 ) => {
@@ -113,7 +123,7 @@ let matchedQueue: { [id: string]: string } = {};
 
 const match = async (swapCommitment: SwapCommitment) => {
   const config = getConfig();
-  
+
   const id = swapCommitment.id;
   const {
     initiator,
@@ -221,7 +231,7 @@ const match = async (swapCommitment: SwapCommitment) => {
 export const watchForCommitments = async () => {
   const config = getConfig();
   const queue = new Queue(
-    async (fn, cb) => {
+    async (fn:Function, cb:Function) => {
       console.log("------ Process queue entry start ------");
       await fn();
       console.log("------ Process queue entry end ------");
@@ -341,6 +351,7 @@ const claim = async (sourceId: string, proof: string) => {
     console.log(`>   sourceSwap hashedSecret: ${sourceSwap.hashedSecret}`);
 
     console.log(`> revealing commitment ${sourceId} on source chain`);
+
     const claimResponse = await sourceContract.claim(sourceId, proof);
 
     const claimReceipt = await claimResponse.wait();

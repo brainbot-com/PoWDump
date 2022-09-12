@@ -1,13 +1,11 @@
 import { JsonRpcSigner, TransactionResponse } from '@ethersproject/providers'
 import { getPoSSwapContract, getPoWSwapContract } from './swapContract'
-import { parseEther } from 'ethers/lib/utils'
 
 export async function commit(
   params: {
     claimPeriodInSec: string
     hashedSecret: string
-    initiatorEthAddress: string
-    lockedEthAmount: string
+    value: string
     expectedAmount: string
     recipient: string
   },
@@ -17,11 +15,11 @@ export async function commit(
   const txResponse: TransactionResponse = await ethSwapContract.commit(
     params.claimPeriodInSec,
     params.hashedSecret,
-    parseEther(params.lockedEthAmount),
-    parseEther(params.expectedAmount),
+    params.value,
+    params.expectedAmount,
     params.recipient,
     {
-      value: parseEther(params.lockedEthAmount),
+      value: params.value,
       gasLimit: '1000000',
     }
   )

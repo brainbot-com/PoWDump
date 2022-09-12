@@ -1,21 +1,19 @@
 import React, { Fragment, useState } from 'react'
 import { Popover, Transition } from '@headlessui/react'
 import { classNames } from '../../utils/tailwind'
-import { CogIcon } from '@heroicons/react/solid'
 import { usePrice } from '../../hooks/use-price'
 import { useStore } from '../../store'
 import { CustomDecimalInput } from '../input-row'
 import { SuggestedPriceTooltipHelp } from './suggested-price-tooltip-help'
-import { QuestionMarkCircleIcon } from '@heroicons/react/outline'
+import { Cog8ToothIcon as CogIcon, QuestionMarkCircleIcon } from '@heroicons/react/24/solid'
 
-type Props = {
-  onSettingUpdate: (setting: string, value: string) => void
-}
 
-export function Settings({ onSettingUpdate }: Props) {
+export function Settings() {
   const userPrice = useStore(state => state.userPrice)
   const setUserPrice = useStore(state => state.setUserPrice)
-  const [offerValidFor, setOfferValidFor] = useState('')
+  const claimPeriodInSec = useStore(state => state.swapSettings.claimPeriodInSec)
+  const updateSwapSetting = useStore(state => state.updateSwapSetting)
+  const [offerValidFor, setOfferValidFor] = useState(Math.floor(Number(claimPeriodInSec) / 60).toString())
   const [suggestedPrice, priceFromAPI] = usePrice()
 
   return (
@@ -53,15 +51,16 @@ export function Settings({ onSettingUpdate }: Props) {
                 >
                   Dump offer valid for:
                   <div>
-                    <input
+                    <CustomDecimalInput
+                      id={'offerValidFor'}
                       className={
                         'dark:bg-zinc-800 border border-zinc-700 rounded rounded-lg w-1/3 mr-2 px-2 text-right'
                       }
                       type={'text'}
                       placeholder={'10'}
-                      onChange={e => {
-                        setOfferValidFor(e.target.value)
-                        onSettingUpdate('dumpOfferValidFor', e.target.value)
+                      onChangeInputValue={value => {
+                        setOfferValidFor(value)
+                        updateSwapSetting('claimPeriodInSec', Number(+value) * 60)
                       }}
                       value={offerValidFor}
                     />
@@ -72,7 +71,11 @@ export function Settings({ onSettingUpdate }: Props) {
                     <br />
                     <div className={'text-sm flex flex-row'}>
                       suggested price: {suggestedPrice}
-                      <SuggestedPriceTooltipHelp price={String(priceFromAPI)}>
+                      <SuggestedPriceTooltipHelp
+                        price={String(priceFromAPI)}
+                        strategy={'fixed'}
+                        isReferenceHidden={true}
+                      >
                         <QuestionMarkCircleIcon className={'w-4 h-4 text-zinc-400'} />
                       </SuggestedPriceTooltipHelp>
                       <div className={'ml-1'}></div>

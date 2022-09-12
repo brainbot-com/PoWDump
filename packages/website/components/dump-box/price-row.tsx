@@ -1,7 +1,7 @@
 import React from 'react'
 import { usePrice } from '../../hooks/use-price'
 import { useStore } from '../../store'
-import { ExclamationIcon } from '@heroicons/react/outline'
+import { ExclamationTriangleIcon } from '@heroicons/react/24/outline'
 import { classNames } from '../../utils/tailwind'
 import { SuggestedPriceTooltipHelp } from './suggested-price-tooltip-help'
 
@@ -57,7 +57,7 @@ export const PriceRow = () => {
           )}
         >
           <div className={'w-20'}>
-            <ExclamationIcon />
+            <ExclamationTriangleIcon />
           </div>
           <div className={'ml-2'}>
             {warning.message}
@@ -81,7 +81,7 @@ export const PriceRow = () => {
         {userPrice !== '' ? (
           Number(userPrice).toFixed(6)
         ) : (
-          <SuggestedPriceTooltipHelp price={String(priceFromAPI)}>
+          <SuggestedPriceTooltipHelp price={String(priceFromAPI)}  strategy={"absolute"} isReferenceHidden={false}>
             <div className={'border-b border-dotted hover:cursor-pointer'}>{suggestedPrice} ETH</div>
           </SuggestedPriceTooltipHelp>
         )}

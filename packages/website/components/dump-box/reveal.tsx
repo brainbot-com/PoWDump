@@ -8,10 +8,11 @@ import { switchChain } from '../../utils/switchChain'
 import { getPoSSwapContract } from '../../utils/swapContract'
 import { formatAddress } from '../../utils/helpers'
 import { CopyToClipboard } from './copy-to-clipboard'
-import { CheckCircleIcon } from '@heroicons/react/solid'
+import { CheckCircleIcon } from '@heroicons/react/24/solid'
 import { formatEther } from 'ethers/lib/utils'
 import { SwapType } from './search-swap'
-import {TransactionReceipt} from "@ethersproject/abstract-provider";
+import { TransactionReceipt } from '@ethersproject/abstract-provider'
+import { useStore } from '../../store'
 
 type Props = {
   swap: SwapType
@@ -23,6 +24,7 @@ export const Reveal = ({ swap, secret, onRevealEnd }: Props) => {
   const [isRevealing, setIsRevealing] = useState(false)
   const [txHash, setTxHash] = useState('')
   const [txReceipt, setTxReceipt] = useState<TransactionReceipt>()
+    const updateFormValue = useStore(state => state.updateFormValue)
 
   let content = null
 
@@ -75,7 +77,10 @@ export const Reveal = ({ swap, secret, onRevealEnd }: Props) => {
                 setTxHash(txResponse.hash)
                 const txReceipt = await txResponse.wait()
 
-                setTxReceipt(txReceipt)
+                if (txReceipt.status === 1) {
+                  setTxReceipt(txReceipt)
+                    updateFormValue('complete', true)
+                }
 
                 onRevealEnd()
               }

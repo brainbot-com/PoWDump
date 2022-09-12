@@ -1,7 +1,7 @@
 /* This example requires Tailwind CSS v2.0+ */
 import { Fragment, useEffect, useState } from 'react'
 import { Popover, Transition } from '@headlessui/react'
-import { ChevronDownIcon, ExclamationIcon } from '@heroicons/react/solid'
+import { ChevronDownIcon, ExclamationTriangleIcon as ExclamationIcon } from '@heroicons/react/24/solid'
 import { classNames } from '../../utils/tailwind'
 import { switchChain } from '../../utils/switchChain'
 import { useWeb3React } from '@web3-react/core'

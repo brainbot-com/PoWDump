@@ -20,11 +20,11 @@ export function InputRow(props: Props) {
 
   return (
     <div className="w-full">
-      <div className="group flex-col rounded-md dark:bg-brown-orange pt-2 hover:bg-sky-700">
+      <div className="group flex-col rounded-md bg-brown-orange pt-2 border border-1 border-transparent hover:border-gray focus-within:border-gray">
         <div className="flex flex-row mt-2">
           <div className={'flex-1 '}>
             <CustomDecimalInput
-              className="w-full  appearance-none outline-none dark:bg-brown-orange text-2xl text-white ml-4 mt-2 group-hover:text-white"
+              className="w-full appearance-none outline-none dark:bg-brown-orange text-2xl text-white ml-4 mt-2 group-hover:text-white "
               onChangeInputValue={value => {
                 props.onChangeInputValue(value)
               }}

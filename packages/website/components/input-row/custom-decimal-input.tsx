@@ -16,9 +16,10 @@ export type InputProps = {
     onChangeInputValue: (value: string) => void
 }
 export const CustomDecimalInput = (props: InputProps) => {
+    const {onChangeInputValue, ...rest} = props
     const enforcer = (nextUserInput: string) => {
         if (nextUserInput === '' || inputRegex.test(escapeRegExp(nextUserInput))) {
-            props.onChangeInputValue(nextUserInput)
+            onChangeInputValue(nextUserInput)
         }
     }
 
@@ -34,7 +35,7 @@ export const CustomDecimalInput = (props: InputProps) => {
             minLength={1}
             maxLength={77}
             spellCheck="false"
-            {...props}
+            {...rest}
         />
     )
 }
