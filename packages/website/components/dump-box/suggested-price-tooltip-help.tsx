@@ -2,7 +2,7 @@ import React from 'react'
 import { Tooltip } from '../tooltip'
 import config from '../../config'
 
-export function SuggestedPriceTooltipHelp(props: { price: string; children: React.ReactNode, strategy: 'absolute' | 'fixed', isReferenceHidden?: boolean }) {
+export function SuggestedPriceTooltipHelp(props: { price: string; children: React.ReactNode, strategy: 'absolute' | 'fixed' }) {
   return (
     <Tooltip
       label={
@@ -13,7 +13,6 @@ export function SuggestedPriceTooltipHelp(props: { price: string; children: Reac
       }
       placement={'top'}
       strategy={props.strategy}
-      isReferenceHidden={props.isReferenceHidden}
     >
       {props.children}
     </Tooltip>

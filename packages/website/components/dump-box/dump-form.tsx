@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { defaultClaimPeriodInSec } from '../../constants'
+import { defaultClaimPeriodInSec, defaultTransactionDeadlineInSec } from '../../constants'
 import { useStore } from '../../store'
 import { useWeb3React } from '@web3-react/core'
 import { Web3Provider } from '@ethersproject/providers'
@@ -98,7 +98,9 @@ const valueToString = (number: string | number) => {
 }
 
 export function DumpForm() {
-  const claimPeriodInSec:number = useStore(state => state.swapSettings.claimPeriodInSec)
+  const claimPeriodInSec: number = useStore(state => state.swapSettings.claimPeriodInSec) || defaultClaimPeriodInSec
+  const transactionExpiryTime: number =
+    useStore(state => state.swapSettings.transactionDeadlineInSec) || defaultTransactionDeadlineInSec
   // const [claimPeriodInSec, setClaimPeriodInSec] = React.useState<string | number>(claimPeriodInSec)
   const form = useStore(state => state.form)
   const [ethPoSAmount, setPoSAmount] = useState('0.0')
@@ -118,12 +120,6 @@ export function DumpForm() {
   const { account, provider, connector } = useWeb3React<Web3Provider>()
 
   const [error, setError] = useState('')
-
-  const reset = () => {
-    // setClaimPeriodInSec(defaultClaimPeriodInSec)
-
-    resetForm()
-  }
 
   useEffect(() => {
     try {
@@ -192,14 +188,18 @@ export function DumpForm() {
         hashedSecret: hashedSecret,
         initiator: account as string,
         recipient: ZERO_ADDRESS,
-        endTimeStamp: String(Date.now() + (claimPeriodInSec) * 1000)
+        endTimeStamp: String(Date.now() + claimPeriodInSec * 1000),
       }
       setProcessingCommitment(subgraphCommitment)
 
       updateFormValue('signed', false)
 
       const txResponse = await commit(
-        { ...subgraphCommitment, claimPeriodInSec: String(claimPeriodInSec)},
+        {
+          ...subgraphCommitment,
+          claimPeriodInSec: String(claimPeriodInSec),
+          transactionExpiryTime: String(Math.floor((Date.now() + transactionExpiryTime * 1000) / 1000)),
+        },
         // @ts-ignore
         provider?.getSigner(account)
       )
@@ -222,11 +222,9 @@ export function DumpForm() {
         ...subgraphCommitment,
         id: swapId,
       })
-
     } catch (error) {
       console.log('error when submitting', error)
       setProcessingCommitment(null)
-      resetForm()
       setNotification({ type: 'error', description: getErrorMessage(error), title: 'Error' })
     } finally {
       updateFormValue('isCommitting', false)

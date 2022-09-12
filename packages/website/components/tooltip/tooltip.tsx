@@ -9,7 +9,6 @@ type TooltipProps = {
     enterDelay?: number;
     leaveDelay?: number;
     strategy: 'absolute' | 'fixed';
-    isReferenceHidden?: boolean;
 } & React.HTMLAttributes<HTMLDivElement>;
 
 export const Tooltip: React.FC<TooltipProps> = (props) => {
@@ -20,7 +19,6 @@ export const Tooltip: React.FC<TooltipProps> = (props) => {
         leaveDelay = 150,
         placement = "bottom",
         strategy = "absolute",
-        isReferenceHidden = false,
     } = props;
 
     const [isOpen, setIsOpen] = useState(false);
@@ -31,8 +29,7 @@ export const Tooltip: React.FC<TooltipProps> = (props) => {
     let { styles, attributes } = usePopper(referenceElement, popperElement, {
         placement,
         strategy: strategy,
-        // isReferenceHidden: isReferenceHidden,
-        modifiers: [{ name: "offset", options: { offset: [0, 4] } }],
+        modifiers: [{ name: "offset", options: { offset: [0, 7] } }],
     });
 
     let enterTimeout = useRef<NodeJS.Timeout>();
@@ -61,7 +58,7 @@ export const Tooltip: React.FC<TooltipProps> = (props) => {
                 ref={setPopperElement}
                 style={styles.popper}
                 {...attributes.popper}
-                className={`transition-opacity ${isOpen ? "opacity-100" : "opacity-0"}`}
+                className={`transition-opacity ${isOpen ? "opacity-100 visible" : "opacity-0 invisible"}`}
             >
                 {label}
             </div>

@@ -3,6 +3,7 @@ import { getPoSSwapContract, getPoWSwapContract } from './swapContract'
 
 export async function commit(
   params: {
+    transactionExpiryTime: string
     claimPeriodInSec: string
     hashedSecret: string
     value: string
@@ -12,7 +13,11 @@ export async function commit(
   signer: JsonRpcSigner
 ) {
   const ethSwapContract = getPoWSwapContract(signer)
-  const txResponse: TransactionResponse = await ethSwapContract.commit(
+
+  const txResponse: TransactionResponse = await ethSwapContract[
+    'commit(uint64,uint64,bytes32,uint256,uint256,address)'
+  ](
+    params.transactionExpiryTime,
     params.claimPeriodInSec,
     params.hashedSecret,
     params.value,
@@ -20,7 +25,6 @@ export async function commit(
     params.recipient,
     {
       value: params.value,
-      gasLimit: '1000000',
     }
   )
   return txResponse
