@@ -64,7 +64,7 @@ if (isCI) {
       }
     },
     solidity: {
-      version: "0.8.9"
+      version: "0.8.16"
     },
     deployments: {
       pos: {
