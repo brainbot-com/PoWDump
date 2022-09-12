@@ -8,6 +8,8 @@ type TooltipProps = {
     placement?: PopperJS.Placement;
     enterDelay?: number;
     leaveDelay?: number;
+    strategy: 'absolute' | 'fixed';
+    isReferenceHidden?: boolean;
 } & React.HTMLAttributes<HTMLDivElement>;
 
 export const Tooltip: React.FC<TooltipProps> = (props) => {
@@ -17,6 +19,8 @@ export const Tooltip: React.FC<TooltipProps> = (props) => {
         enterDelay = 150,
         leaveDelay = 150,
         placement = "bottom",
+        strategy = "absolute",
+        isReferenceHidden = false,
     } = props;
 
     const [isOpen, setIsOpen] = useState(false);
@@ -26,6 +30,8 @@ export const Tooltip: React.FC<TooltipProps> = (props) => {
     let [popperElement, setPopperElement] = useState<HTMLDivElement | null>(null);
     let { styles, attributes } = usePopper(referenceElement, popperElement, {
         placement,
+        strategy: strategy,
+        // isReferenceHidden: isReferenceHidden,
         modifiers: [{ name: "offset", options: { offset: [0, 4] } }],
     });
 

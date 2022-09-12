@@ -11,7 +11,7 @@ type Props = {
 export const DumpBoxLayout = ({message, children, style}: Props) => {
     return (
         <div className="container mx-auto">
-            <img src={PowDumpLogo} alt={"POWDump logo"} className={"mx-auto mt-5"} style={{width: "300px"}}/>
+            <img src={PowDumpLogo} alt={"POWDump logo"} className={"mx-auto pt-5"} style={{width: "300px"}}/>
 
             {message}
             <div

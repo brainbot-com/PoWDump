@@ -13,6 +13,7 @@ import {STATUS} from "web3modal/dist/providers/injected";
 import {Status} from "./status";
 import {formatAddress} from "../../utils/helpers";
 import {CopyToClipboard} from "./copy-to-clipboard";
+import {useStore} from "../../store";
 
 const posQuery = gql`
     query getSwap($recipient: String!, $hashedSecret: String!, $initiator: String!) {
@@ -26,6 +27,7 @@ const posQuery = gql`
             initiator
             refunded
             value
+            emptied
         }
     }
 `
@@ -51,10 +53,12 @@ export type SwapType = {
 export const SearchSwap = ({recipient, initiator, secret, expectedPoSAmount, onSwapFound}: Props) => {
     const {provider} = useWeb3React<Web3Provider>()
     const [foundSwap, setFoundSwap] = useState<undefined | SwapType>()
+    const [cancelListener, setCancelListener] = useState(false)
     const hashedSecret = keccak256(secret)
     useEffect(() => {
+        let onBlockListener: null | ((blockNumber: Block) => void) = null
         if (provider) {
-            const onBlockListener = async (blockNumber: Block) => {
+            onBlockListener = async (blockNumber: Block) => {
                 const data = await request(config.SUBGRAPH_POS_URL, posQuery, {
                     recipient: String(recipient),
                     hashedSecret: String(hashedSecret),
@@ -65,9 +69,13 @@ export const SearchSwap = ({recipient, initiator, secret, expectedPoSAmount, onS
                     const {swapCommitments} = data
 
                     if (swapCommitments.length === 1) {
-                        const {value} = swapCommitments[0]
+                        const {value, emptied} = swapCommitments[0]
 
-                        if (parseUnits(value, 'wei').eq(parseEther(expectedPoSAmount))) {
+                        if (emptied) {
+                            setCancelListener(true)
+                        }
+
+                        if (parseUnits(value, 'wei').eq((expectedPoSAmount))) {
                             setFoundSwap(swapCommitments[0])
                             onSwapFound(swapCommitments[0])
                         }
@@ -75,13 +83,17 @@ export const SearchSwap = ({recipient, initiator, secret, expectedPoSAmount, onS
                 }
             }
 
-            if (foundSwap) {
+            if (foundSwap || cancelListener) {
                 provider.removeListener('block', onBlockListener)
             } else {
                 provider.on('block', onBlockListener)
             }
         }
-    }, [provider, foundSwap, recipient, hashedSecret, initiator, expectedPoSAmount, onSwapFound])
+
+        return () => {
+            provider && onBlockListener && provider.removeListener('block', onBlockListener)
+        }
+    }, [provider, foundSwap, recipient, hashedSecret, initiator, expectedPoSAmount, onSwapFound, cancelListener])
 
     if (foundSwap) {
         return <Status status={`Swap found.`}/>

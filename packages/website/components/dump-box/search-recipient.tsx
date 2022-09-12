@@ -5,6 +5,7 @@ import {gql, request} from 'graphql-request'
 import {config, ZERO_ADDRESS} from '../../config'
 import type {Block} from "@ethersproject/abstract-provider";
 import {Status} from "./status";
+import {useStore} from "../../store";
 
 const query = gql`
     query getCommitment($id: String!) {
@@ -17,6 +18,7 @@ const query = gql`
             proof
             recipient
             refunded
+            emptied
             value
         }
     }
@@ -27,10 +29,13 @@ export const SearchRecipient = ({
                                 }: { swapId: string; onRecipient: (recipient: string) => void }) => {
     const {provider} = useWeb3React<Web3Provider>()
     const [recipient, setRecipient] = useState<string | undefined>()
+    const processingCommitment = useStore(state => state.processingCommitment)
+    const setProcessingCommitment = useStore(state => state.setProcessingCommitment)
 
     useEffect(() => {
+        let onBlockListener: null | ((blockNumber: Block) => void) = null
         if (provider) {
-            const onBlockListener = async (blockNumber: Block) => {
+            onBlockListener = async (blockNumber: Block) => {
                 const data = await request(config.SUBGRAPH_POW_URL, query, {id: String(swapId)})
 
                 if (data) {
@@ -40,6 +45,16 @@ export const SearchRecipient = ({
                         if (swapCommitment.recipient !== ZERO_ADDRESS) {
                             onRecipient(swapCommitment.recipient)
                             setRecipient(swapCommitment.recipient)
+
+                            if(processingCommitment) {
+                                setProcessingCommitment({
+                                    ...processingCommitment,
+                                    recipient: swapCommitment.recipient,
+                                    proof: swapCommitment.proof,
+                                    refunded: swapCommitment.refunded,
+                                    emptied: swapCommitment.emptied,
+                                })
+                            }
                         }
                     }
                 }
@@ -50,11 +65,18 @@ export const SearchRecipient = ({
             } else {
                 provider.on('block', onBlockListener)
             }
+
+
         }
-    }, [provider, recipient, swapId, onRecipient])
+
+        return () => {
+            provider && onBlockListener && provider.removeListener('block', onBlockListener)
+        }
+    }, [provider, recipient, swapId, onRecipient, processingCommitment, setProcessingCommitment])
 
     if (recipient) {
-        return <Status status={`Counterparty: ${recipient} committed to the swap. Waiting to find their swap on the PoS chain.`} />
+        return <Status
+            status={`Counterparty: ${recipient} committed to the swap. Waiting to find their swap on the PoS chain.`}/>
     }
-    return <Status status={"Searching for counterparty to match the dump"} />
+    return <Status status={"Searching for counterparty to match the dump"}/>
 }

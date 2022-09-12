@@ -1,7 +1,12 @@
 import type {NextPage} from 'next'
 
 import Layout from "../components/layout";
-import {DumpBox} from "../components/dump-box";
+import dynamic from "next/dynamic";
+
+const DumpBox = dynamic<{}>(() => import('../components/dump-box').then(mod => mod.DumpBox), {
+    ssr: false,
+})
+
 
 const Home: NextPage = () => {
 

@@ -17,9 +17,9 @@ const availableConnections = [
 function MyApp({Component, pageProps}: AppProps) {
     useEagerlyConnect()
     const connections = availableConnections.map(getConnection)
-    const connectors: [Connector, Web3ReactHooks][] = connections.map(({ hooks, connector }) => [connector, hooks])
+    const connectors: [Connector, Web3ReactHooks][] = connections.map(({hooks, connector}) => [connector, hooks])
 
-    const key = useMemo(() => connections.map(({ type }: Connection) => getConnectionName(type)).join('-'), [connections])
+    const key = useMemo(() => connections.map(({type}: Connection) => getConnectionName(type)).join('-'), [connections])
 
     return (
         <Web3ReactProvider connectors={connectors} key={key}>

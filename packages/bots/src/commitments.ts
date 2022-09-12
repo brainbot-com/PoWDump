@@ -49,6 +49,15 @@ const getSwapFromSourceContract = async (id: string) => {
   return sourceContract.swaps(id);
 };
 
+export const matchCommitmentBySwapId = async (id: string) => {
+    const swap = await getSwapFromSourceContract(id);
+    const swapCommitment = {
+        id,
+        swap
+    };
+    return match(swapCommitment);
+}
+
 export const matchCommitmentTx = async (
   transactionWithSwapCommitment: string
 ) => {
@@ -216,7 +225,7 @@ const match = async (swapCommitment: SwapCommitment) => {
 export const watchForCommitments = async () => {
   const config = getConfig();
   const queue = new Queue(
-    async (fn, cb) => {
+    async (fn:Function, cb:Function) => {
       console.log("------ Process queue entry start ------");
       await fn();
       console.log("------ Process queue entry end ------");
