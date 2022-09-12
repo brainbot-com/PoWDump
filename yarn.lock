@@ -1599,6 +1599,13 @@
   resolved "https://registry.npmjs.org/@types/abstract-leveldown/-/abstract-leveldown-7.2.0.tgz"
   integrity sha512-q5veSX6zjUy/DlDhR4Y4cU0k2Ar+DT2LUraP00T19WLmTO6Se1djepCCaqU6nQrwcJ5Hyo/CWqxTzrrFg8eqbQ==
 
+"@types/better-queue@^3.8.3":
+  version "3.8.3"
+  resolved "https://registry.npmjs.org/@types/better-queue/-/better-queue-3.8.3.tgz#69dd8ba158749749df0cb48ef05ab4d62145575a"
+  integrity sha512-xCWSF5i1CJMq271mGjK4MrAzIEFNFKVv/eMtL8eUyD4rOOcx1SBs2zhcQxVkWjCz2TVMQOUUxwkgWyDDyvw+rw==
+  dependencies:
+    "@types/node" "*"
+
 "@types/bn.js@^4.11.3":
   version "4.11.6"
   resolved "https://registry.npmjs.org/@types/bn.js/-/bn.js-4.11.6.tgz"
@@ -2818,6 +2825,20 @@ bech32@1.1.4:
   version "1.1.4"
   resolved "https://registry.npmjs.org/bech32/-/bech32-1.1.4.tgz"
   integrity sha512-s0IrSOzLlbvX7yp4WBfPITzpAU8sqQcpsmwXDiKwrG4r491vwCO/XpejasRNl0piBMe/DvP4Tz0mIS/X1DPJBQ==
+
+better-queue-memory@^1.0.1:
+  version "1.0.4"
+  resolved "https://registry.npmjs.org/better-queue-memory/-/better-queue-memory-1.0.4.tgz#f390d6b30bb3b36aaf2ce52b37a483e8a7a81a22"
+  integrity sha512-SWg5wFIShYffEmJpI6LgbL8/3Dqhku7xI1oEiy6FroP9DbcZlG0ZDjxvPdP9t7hTGW40IpIcC6zVoGT1oxjOuA==
+
+better-queue@^3.8.11:
+  version "3.8.11"
+  resolved "https://registry.npmjs.org/better-queue/-/better-queue-3.8.11.tgz#8b63203793b30590891f40ee7bca9eeedb3c3106"
+  integrity sha512-lfq4EvZfM/zYXa7x6bTsVkdZjz/srU6dJ/EsaydzVWVoFlKfhXLA5MJhqVLX3Mv7CPgubXyQktplV0amrF6kJw==
+  dependencies:
+    better-queue-memory "^1.0.1"
+    node-eta "^0.9.0"
+    uuid "^9.0.0"
 
 big-integer@^1.6.16:
   version "1.6.51"
@@ -5928,9 +5949,9 @@ globby@^11.1.0:
     merge2 "^1.4.1"
     slash "^3.0.0"
 
-"gluegun@git+https://github.com/edgeandnode/gluegun.git#v4.3.1-pin-colors-dep":
+"gluegun@https://github.com/edgeandnode/gluegun#v4.3.1-pin-colors-dep":
   version "4.3.1"
-  resolved "git+https://github.com/edgeandnode/gluegun.git#b34b9003d7bf556836da41b57ef36eb21570620a"
+  resolved "https://github.com/edgeandnode/gluegun#b34b9003d7bf556836da41b57ef36eb21570620a"
   dependencies:
     apisauce "^1.0.1"
     app-module-path "^2.2.0"
@@ -8358,6 +8379,11 @@ node-environment-flags@1.0.6:
   dependencies:
     object.getownpropertydescriptors "^2.0.3"
     semver "^5.7.0"
+
+node-eta@^0.9.0:
+  version "0.9.0"
+  resolved "https://registry.npmjs.org/node-eta/-/node-eta-0.9.0.tgz#9fb0b099bcd2a021940e603c64254dc003d9a7a8"
+  integrity sha512-mTCTZk29tmX1OGfVkPt63H3c3VqXrI2Kvua98S7iUIB/Gbp0MNw05YtUomxQIxnnKMyRIIuY9izPcFixzhSBrA==
 
 node-fetch@2, node-fetch@2.6.7, node-fetch@^2.3.0, node-fetch@^2.6.0, node-fetch@^2.6.1, node-fetch@^2.6.7:
   version "2.6.7"
@@ -11109,6 +11135,11 @@ uuid@^8.3.2:
   version "8.3.2"
   resolved "https://registry.npmjs.org/uuid/-/uuid-8.3.2.tgz"
   integrity sha512-+NYs2QeMWy+GWFOEm9xnn6HCDp0l7QBD7ml8zLUmJ+93Q5NF0NocErnwkTkXVFNiX3/fpC6afS8Dhb/gz7R7eg==
+
+uuid@^9.0.0:
+  version "9.0.0"
+  resolved "https://registry.npmjs.org/uuid/-/uuid-9.0.0.tgz#592f550650024a38ceb0c562f2f6aa435761efb5"
+  integrity sha512-MXcSTerfPa4uqyzStbRoTgt5XIe3x5+42+q1sDuy3R5MDk66URdLMOZe5aPX/SQd+kuYAh0FdP/pO28IkQyTeg==
 
 uuidv4@2.0.0:
   version "2.0.0"
