@@ -22,15 +22,13 @@ export default function Notification() {
     if (notification && shownError !== notification) {
       setShow(true)
       setShownError(notification)
-
-      const timer = setTimeout(() => {
-        setShow(false)
-      }, 5000)
-
-      return () => clearTimeout(timer)
-    } else {
-      setShow(false)
     }
+
+    const timer = setTimeout(() => {
+      setShow(false)
+    }, 5000)
+
+    return () => clearTimeout(timer)
   }, [notification, shownError])
 
   return (
