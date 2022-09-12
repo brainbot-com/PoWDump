@@ -147,10 +147,7 @@ const match = async (swapCommitment: SwapCommitment) => {
     console.log(`> Trying to add recipient to commitment ${id}`);
     const changeRecipientResponse = await sourceContract.changeRecipient(
       id,
-      sourceWallet.address,
-      {
-        gasLimit: "1000000"
-      }
+      sourceWallet.address
     );
 
     const addRecipient = await changeRecipientResponse.wait();
@@ -181,7 +178,6 @@ const match = async (swapCommitment: SwapCommitment) => {
     initiator,
     {
       value: expectedAmount.add(fee),
-      gasLimit: "1000000"
     }
   );
 
@@ -345,9 +341,7 @@ const claim = async (sourceId: string, proof: string) => {
     console.log(`>   sourceSwap hashedSecret: ${sourceSwap.hashedSecret}`);
 
     console.log(`> revealing commitment ${sourceId} on source chain`);
-    const claimResponse = await sourceContract.claim(sourceId, proof, {
-      gasLimit: "1000000"
-    });
+    const claimResponse = await sourceContract.claim(sourceId, proof);
 
     const claimReceipt = await claimResponse.wait();
 
