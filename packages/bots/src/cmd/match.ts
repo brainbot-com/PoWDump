@@ -68,7 +68,7 @@ yargs(hideBin(process.argv))
   )
   .command(
     "watch <swapContractAddressOnSourceChain> [swapContractAddressOnTargetChain] [commitmentSourceChainRPC] [commitmentTargetChainRPC] [privateKey]",
-    "Match a commitment from the source chain to the target chain by finding a swap commitment in the given transaction hash.",
+    "Watches the source contract for new commitments and matches them on the target chain",
     (args: Argv) => {
       args.option("swapContractAddressOnSourceChain", {
         describe:
