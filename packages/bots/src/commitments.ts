@@ -36,10 +36,19 @@ const getCommitmentInTransaction = async (
 
   const log = getCommitLog(receipt);
   const { id } = log.args;
+  const contractSwap = await getSwapFromSourceContract(id)
 
   return {
     id: id,
-    swap: await getSwapFromSourceContract(id)
+    swap: {
+        initiator: contractSwap.initiator,
+        recipient: contractSwap.recipient,
+        value: contractSwap.value,
+        expectedAmount: contractSwap.expectedAmount,
+        endTimeStamp: contractSwap.endTimeStamp,
+        hashedSecret: contractSwap.hashedSecret,
+        id: id
+    }
   };
 };
 
@@ -104,7 +113,7 @@ let matchedQueue: { [id: string]: string } = {};
 
 const match = async (swapCommitment: SwapCommitment) => {
   const config = getConfig();
-
+  
   const id = swapCommitment.id;
   const {
     initiator,
