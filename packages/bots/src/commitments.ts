@@ -36,18 +36,18 @@ const getCommitmentInTransaction = async (
 
   const log = getCommitLog(receipt);
   const { id } = log.args;
-  const contractSwap = await getSwapFromSourceContract(id)
+  const contractSwap = await getSwapFromSourceContract(id);
 
   return {
     id: id,
     swap: {
-        initiator: contractSwap.initiator,
-        recipient: contractSwap.recipient,
-        value: contractSwap.value,
-        expectedAmount: contractSwap.expectedAmount,
-        endTimeStamp: contractSwap.endTimeStamp,
-        hashedSecret: contractSwap.hashedSecret,
-        id: id
+      initiator: contractSwap.initiator,
+      recipient: contractSwap.recipient,
+      value: contractSwap.value,
+      expectedAmount: contractSwap.expectedAmount,
+      endTimeStamp: contractSwap.endTimeStamp,
+      hashedSecret: contractSwap.hashedSecret,
+      id: id
     }
   };
 };
@@ -58,64 +58,70 @@ const getSwapFromSourceContract = async (id: string) => {
   return sourceContract.swaps(id);
 };
 
-
 export const matchCommitmentBySwapId = async (id: string) => {
-    const swap = await getSwapFromSourceContract(id);
-    const swapCommitment = {
-        id,
-        swap
-    };
-    return match(swapCommitment);
-}
+  const swap = await getSwapFromSourceContract(id);
+  const swapCommitment = {
+    id,
+    swap
+  };
+
+  try {
+    await match(swapCommitment);
+    await watchForReveal();
+  } catch (e) {
+    console.log("match failed", e);
+  }
+};
 
 export const matchCommitmentTx = async (
   transactionWithSwapCommitment: string
 ) => {
-  const config = getConfig();
   const swapCommitment = await getCommitmentInTransaction(
     transactionWithSwapCommitment
   );
 
+  try {
+    await match(swapCommitment);
+    await watchForReveal();
+  } catch (e) {
+    console.log("match failed", e);
+  }
+};
+
+const watchForReveal = async () => {
+  const config = getConfig();
   const targetContract = config.target.contract;
   const revealFilter = {
     address: targetContract.address,
     topics: [utils.id("Claim(address,uint256,bytes32,uint32)")]
   };
 
-  try {
-    await match(swapCommitment);
+  targetContract.on(revealFilter, async (...theArgs) => {
+    const id = theArgs[3];
+    const proof = theArgs[2];
+    const sourceId = matchedQueue[id];
 
-    targetContract.on(revealFilter, async (...theArgs) => {
-      const id = theArgs[3];
-      const proof = theArgs[2];
-      const sourceId = matchedQueue[id];
+    console.log(`============= Reveal found: ${id} start =============`);
 
-      console.log(`============= Reveal found: ${id} start =============`);
+    if (sourceId) {
+      console.log(
+        `> It appears we've matched this on source chain: ${sourceId} start`
+      );
 
-      if (sourceId) {
-        console.log(
-            `> It appears we've matched this on source chain: ${sourceId} start`
-        );
-
-        try {
-          await claim(sourceId, proof);
-        } catch (error) {
-          console.log("> couldn't claim", error);
-        }
-
-      } else {
-        console.log(
-            `> Someone Revealed the proof to ${id} but we didn't match it in the first place. Nothing to do...`
-        );
+      try {
+        await claim(sourceId, proof);
+      } catch (error) {
+        console.log("> couldn't claim", error);
       }
+    } else {
+      console.log(
+        `> Someone Revealed the proof to ${id} but we didn't match it in the first place. Nothing to do...`
+      );
+    }
 
-      targetContract.removeAllListeners(revealFilter);
-      console.log(`============= Reveal ${id} completed =============`);
-    });
-  } catch (e) {
-    console.log('match failed', e);
-  }
-
+    targetContract.removeAllListeners(revealFilter);
+    console.log(`============= Reveal ${id} completed =============`);
+  });
 };
 
 // targetId -> sourceId
@@ -136,15 +142,19 @@ const match = async (swapCommitment: SwapCommitment) => {
 
   console.log(`> Trying to match commitment ${id}`);
 
-  if(value.eq(BigNumber.from(0))) {
+  if (value.eq(BigNumber.from(0))) {
     throw new Error(`> Source commitment ${id} appears to be claimed`);
   }
 
-  if(endTimeStamp.lt(BigNumber.from(Math.floor(Date.now() / 1000)))) {
+  if (endTimeStamp.lt(BigNumber.from(Math.floor(Date.now() / 1000)))) {
     throw new Error(`> Source commitment ${id} appears to be expired`);
   }
 
-  if(endTimeStamp.lt(BigNumber.from(Math.floor((Date.now() + 1000 * 60 * 3) / 1000)))) {
+  if (
+    endTimeStamp.lt(
+      BigNumber.from(Math.floor((Date.now() + 1000 * 60 * 3) / 1000))
+    )
+  ) {
     throw new Error(`> Source commitment ${id} appears to be expired`);
   }
 
@@ -163,7 +173,9 @@ const match = async (swapCommitment: SwapCommitment) => {
     const addRecipient = await changeRecipientResponse.wait();
 
     if (addRecipient.status === 0) {
-      throw new Error(`> Failed to add recipient to commitment ${id}. Tx hash: ${addRecipient.transactionHash}`);
+      throw new Error(
+        `> Failed to add recipient to commitment ${id}. Tx hash: ${addRecipient.transactionHash}`
+      );
     }
 
     console.log(
@@ -180,21 +192,18 @@ const match = async (swapCommitment: SwapCommitment) => {
 
   console.log(`> Trying to add commitment ${id} on target chain`);
   const fee = await ethSwapContractOnTarget.feeFromSwapValue(expectedAmount);
-  const commitmentOnTargetResponse = await ethSwapContractOnTarget["commit(uint64,bytes32,uint256,uint256,address)"](
-    endTimeStamp,
-    hashedSecret,
-    expectedAmount,
-    value,
-    initiator,
-    {
-      value: expectedAmount.add(fee),
-    }
-  );
+  const commitmentOnTargetResponse = await ethSwapContractOnTarget[
+    "commit(uint64,bytes32,uint256,uint256,address)"
+  ](endTimeStamp, hashedSecret, expectedAmount, value, initiator, {
+    value: expectedAmount.add(fee)
+  });
 
   const commitmentReceipt = await commitmentOnTargetResponse.wait();
 
   if (commitmentReceipt.status === 0) {
-    throw new Error(`> Failed to commit on target chain. Tx hash: ${commitmentReceipt.transactionHash}`);
+    throw new Error(
+      `> Failed to commit on target chain. Tx hash: ${commitmentReceipt.transactionHash}`
+    );
   }
 
   const myTxLogs = getCommitLog(commitmentReceipt);
@@ -231,14 +240,14 @@ const match = async (swapCommitment: SwapCommitment) => {
 export const watchForCommitments = async () => {
   const config = getConfig();
   const queue = new Queue(
-    async (fn:Function, cb:Function) => {
+    async (fn: Function, cb: Function) => {
       console.log("------ Process queue entry start ------");
       await fn();
       console.log("------ Process queue entry end ------");
       cb();
     },
     { concurrent: 1 }
-  )
+  );
 
   const sourceContract = config.source.contract;
   const targetContract = config.target.contract;
@@ -306,14 +315,13 @@ export const watchForCommitments = async () => {
         `> It appears we've matched this on source chain: ${sourceId} start`
       );
 
-        queue.push(async () => {
-          try {
-            await claim(sourceId, proof);
-          } catch (error) {
-            console.log("> couldn't claim", error);
-          }
-        });
-
+      queue.push(async () => {
+        try {
+          await claim(sourceId, proof);
+        } catch (error) {
+          console.log("> couldn't claim", error);
+        }
+      });
     } else {
       console.log(
         `> Someone Revealed the proof to ${id} but we didn't match it in the first place. Nothing to do...`
