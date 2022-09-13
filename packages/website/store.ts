@@ -1,6 +1,6 @@
 import create from 'zustand'
 import { devtools, persist } from 'zustand/middleware'
-import {defaultClaimPeriodInSec} from "./constants";
+import {defaultClaimPeriodInSec, defaultTransactionDeadlineInSec} from "./constants";
 
 export type NotificationType = {
   type: 'error' | 'success' | 'info' | 'warning'
@@ -38,6 +38,7 @@ export type Commitisch = Omit<SubgraphCommitment, 'id' | 'proof' | 'emptied' | '
 
 type SwapSettings = {
     claimPeriodInSec: number
+    transactionDeadlineInSec: number
 }
 
 type Store = {
@@ -77,6 +78,7 @@ const defaultForm: FormType = {
 
 const defaultSwapSettings: SwapSettings = {
   claimPeriodInSec: defaultClaimPeriodInSec,
+  transactionDeadlineInSec: defaultTransactionDeadlineInSec,
 }
 
 export const useStore = create<Store>()(
