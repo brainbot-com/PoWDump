@@ -1,5 +1,4 @@
 import type {ReactNode} from "react";
-import styles from "../styles/Home.module.css";
 import Head from "next/head";
 import {NavBar} from "./nav-bar";
 import Notification from "./notifications/notifications";

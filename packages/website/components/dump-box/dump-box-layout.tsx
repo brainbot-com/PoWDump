@@ -15,7 +15,7 @@ export const DumpBoxLayout = ({message, children, style}: Props) => {
 
             {message}
             <div
-                className={`max-w-md mx-auto flex flex-col items-center mt-10 rounded-lg
+                className={`max-w-md mx-auto flex flex-col mt-10 rounded-lg
            p-4 shadow-md gap-y-4 ${style === 'in-progress' ? "bg-orange border border-4 border-black text-black" : "bg-rich-black text-white"}  break-words`}
 
             >
