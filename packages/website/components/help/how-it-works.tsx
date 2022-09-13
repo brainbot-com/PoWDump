@@ -15,7 +15,7 @@ export const HowItWorks = () => {
     const steps = [
         {
             message: ' Connect your wallet and select the PoW Ethereum chain.', isAtStep: () => {
-                return !account || !isChainSupported
+                return !account || (!isChainSupported && !processingCommitment)
             }
         },
         {
@@ -25,12 +25,12 @@ export const HowItWorks = () => {
         },
         {
             message: 'Sign a transaction for the dump on the PoW Ethereum chain.', isAtStep: () => {
-                return form.ethPoWAmount && !form.signed && !form.complete
+                return form.ethPoWAmount && !form.signed && !form.complete && isChainSupported
             }
         },
         {
             message: 'Wait for someone to match your transaction or for it to expire.', isAtStep: () => {
-                return processingCommitment && form.signed && !form.complete
+                return (processingCommitment && processingCommitment.id && !form.complete) || (processingCommitment && form.signed && !form.complete && isChainSupported)
             }
         },
         {
