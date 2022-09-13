@@ -190,7 +190,7 @@ export const useStore = create<Store>()(
           ),
       }),
       {
-        name: 'swapState',
+        name: 'persisted-swap-state',
 
         partialize: state =>
           Object.fromEntries(
@@ -199,7 +199,7 @@ export const useStore = create<Store>()(
       }
     ),
     {
-      name: 'swapState',
+      name: 'devtools-swap',
     }
   )
 )
