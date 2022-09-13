@@ -11,6 +11,7 @@ export function InputRow(props: Props) {
     id: props.id,
     value: props.value,
     placeholder: props.placeholder,
+    disabled: props.disabled,
   }
 
   if (props.pattern) {

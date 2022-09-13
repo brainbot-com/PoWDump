@@ -9,12 +9,14 @@ import { ALL_SUPPORTED_CHAIN_IDS, isSupportedChain } from '../../constants/chain
 import { getChainInfo } from '../../constants/chainInfo'
 import { useStore } from '../../store'
 import { getErrorMessage } from '../../utils/error'
+import config from "../../config";
 
 export default function NetworksDropdown() {
-  const [selectedNetwork, setSelectedNetwork] = useState(getChainInfo(1))
+  const [selectedNetwork, setSelectedNetwork] = useState(getChainInfo(config.ENFORCE_SWAP_ON_CHAINS[0]))
   const [unsupportedNetwork, setUnsupportedNetwork] = useState(false)
-  const { connector, provider } = useWeb3React()
+  const { connector, provider, chainId } = useWeb3React()
 
+  console.log('chainId networks dropdown', chainId)
   useEffect(() => {
     const getNetwork = async () => {
       if (provider) {

@@ -2,11 +2,11 @@ import React from "react";
 
 export const CurrencyBadge = ({icon, name}: { icon: string, name: string }) => {
     return (
-        <div className={"flex flex-row content-center items-center"}>
+        <div className={"flex flex-row content-center items-center justify-center"}>
             <img src={icon}
                  alt={"currency icon"}
-                 style={{height: "20px"}}
+                 style={{height: "18px"}}
                  className={"mr-1"}/>
-            <span className={"text-white"}>{name}</span>
+            <div className={"mt-1"}>{name}</div>
         </div>)
 }
