@@ -180,7 +180,7 @@ const match = async (swapCommitment: SwapCommitment) => {
 
   console.log(`> Trying to add commitment ${id} on target chain`);
   const fee = await ethSwapContractOnTarget.feeFromSwapValue(expectedAmount);
-  const commitmentOnTargetResponse = await ethSwapContractOnTarget.commit(
+  const commitmentOnTargetResponse = await ethSwapContractOnTarget["commit(uint64,bytes32,uint256,uint256,address)"](
     endTimeStamp,
     hashedSecret,
     expectedAmount,
