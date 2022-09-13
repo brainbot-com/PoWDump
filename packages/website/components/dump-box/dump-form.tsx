@@ -19,6 +19,7 @@ import PowDumpSmallLogo from '../../public/assets/images/powdump_dapp_small_pow.
 import EthereumLogo from '../../public/assets/images/ethereum-logo.png'
 import { Button } from '../button'
 import dynamic from 'next/dynamic'
+import {isSwapSupportedOnChain} from "../../utils/helpers";
 
 const PriceRow = dynamic(() => import('./price-row'), {
   ssr: false,
@@ -29,12 +30,14 @@ const NO_POS_AMOUNT_ENTERED = 'NO_POS_AMOUNT_ENTERED'
 const NO_CLAIM_PERIOD_ENTERED = 'NO_POS_AMOUNT_ENTERED'
 const TERMS_NOT_ACCEPTED = 'TERMS_NOT_ACCEPTED'
 const PRICE_CANT_BE_ZERO = 'PRICE_CANT_BE_ZERO'
+const SWAP_NOT_SUPPORTED_ON_CHAIN = 'SWAP_NOT_SUPPORTED_ON_CHAIN'
 const errorsTranslations = {
   [NO_WALLET_CONNECTED as string]: 'No wallet connected',
   [NO_POW_AMOUNT_ENTERED as string]: 'Enter PoW Eth amount',
   [NO_POS_AMOUNT_ENTERED as string]: 'Enter expected PoS amount',
   [TERMS_NOT_ACCEPTED as string]: 'Accept terms and conditions',
   [PRICE_CANT_BE_ZERO as string]: "Price can't be 0",
+  [SWAP_NOT_SUPPORTED_ON_CHAIN as string]: "Chain not supported for starting a swap",
 }
 
 type Props = {
@@ -45,6 +48,7 @@ type Props = {
   termsAccepted: boolean
   userPrice: string | number
   suggestedPrice: null | number
+  chainId: number | undefined
 }
 
 const validateForm = ({
@@ -55,9 +59,14 @@ const validateForm = ({
   termsAccepted,
   userPrice,
   suggestedPrice,
+  chainId,
 }: Props) => {
   if (!account) {
     throw new Error(NO_WALLET_CONNECTED)
+  }
+
+  if(!chainId || !isSwapSupportedOnChain(chainId)) {
+    throw new Error('SWAP_NOT_SUPPORTED_ON_CHAIN')
   }
 
   if (userPrice !== '' && userPrice == 0) {
@@ -117,10 +126,11 @@ export function DumpForm() {
   const setSwapSecrets = useStore(state => state.setSwapSecrets)
   const deleteTxSecrets = useStore(state => state.deleteTxSecrets)
   const setNotification = useStore(state => state.setNotification)
-  const { account, provider, connector } = useWeb3React<Web3Provider>()
+  const { account, provider, chainId } = useWeb3React<Web3Provider>()
 
   const [error, setError] = useState('')
 
+  const isSwapEnabled = account && chainId && isSwapSupportedOnChain(chainId)
   useEffect(() => {
     try {
       if (ethPoWAmount && (suggestedPrice || userPrice)) {
@@ -153,6 +163,7 @@ export function DumpForm() {
         termsAccepted,
         userPrice,
         suggestedPrice,
+        chainId,
       })
 
       setError('')
@@ -172,6 +183,7 @@ export function DumpForm() {
         termsAccepted,
         userPrice,
         suggestedPrice,
+        chainId,
       })
 
       const secret = hexlify(randomBytes(32))
@@ -240,6 +252,7 @@ export function DumpForm() {
           setPoWAmount(value)
           updateFormValue('ethPoWAmount', value)
         }}
+        disabled={!isSwapEnabled}
         type="text"
         placeholder="0.0"
         pattern={'^[0-9]*[.,]?[0-9]*$'}
@@ -248,7 +261,7 @@ export function DumpForm() {
       <div className="w-full">
         <div className="flex flex-col rounded-md dark:bg-rich-black-lighter pt-2 border border-1 border-rich-black-lightest">
           <div className="flex flex-row my-2">
-            <div className={'flex-1 mx-5'}>
+            <div className={`flex-1 mx-5 ${!isSwapEnabled ? "text-gray" : ""}`}>
               <PriceRow />
               <div className={'h-px bg-rich-black-lightest my-2'}></div>
 
@@ -280,13 +293,14 @@ export function DumpForm() {
             id="terms"
             name="terms"
             value="terms"
+            disabled={!isSwapEnabled}
             checked={termsAccepted}
             onChange={() => {
               setTermsAccepted(!termsAccepted)
               updateFormValue('termsAccepted', !termsAccepted)
             }}
           />{' '}
-          I understand and accept the Terms & Conditions
+          <span className={!isSwapEnabled ? "text-gray" : ""}>I understand and accept the Terms & Conditions</span>
         </label>
       </div>
 

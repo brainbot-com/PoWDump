@@ -3,31 +3,34 @@ import {Web3Provider} from "@ethersproject/providers";
 import {useState} from "react";
 import {useStore} from "../../store";
 import {classNames} from "../../utils/tailwind";
-import {ZERO_ADDRESS} from "../../config";
+import {config, ZERO_ADDRESS} from "../../config";
 
 export const HowItWorks = () => {
-    const {account} = useWeb3React<Web3Provider>()
+    const {account, chainId} = useWeb3React<Web3Provider>()
     const form = useStore(state => state.form)
     const processingCommitment = useStore(state => state.processingCommitment)
+    const swapSupportedOnChains = config.ENFORCE_SWAP_ON_CHAINS
+
+    const isChainSupported = (!(!chainId || !swapSupportedOnChains.includes(chainId)))
     const steps = [
         {
             message: ' Connect your wallet and select the PoW Ethereum chain.', isAtStep: () => {
-                return !account
+                return !account || (!isChainSupported && !processingCommitment)
             }
         },
         {
             message: 'Decide on the amount of PoW ETH you want to sell and the minimum price.', isAtStep: () => {
-                return account && !form.ethPoWAmount && !processingCommitment && !form.complete
+                return account && !form.ethPoWAmount && !processingCommitment && !form.complete && isChainSupported
             }
         },
         {
             message: 'Sign a transaction for the dump on the PoW Ethereum chain.', isAtStep: () => {
-                return form.ethPoWAmount && !form.signed && !form.complete
+                return form.ethPoWAmount && !form.signed && !form.complete && isChainSupported
             }
         },
         {
             message: 'Wait for someone to match your transaction or for it to expire.', isAtStep: () => {
-                return processingCommitment && form.signed && !form.complete
+                return (processingCommitment && processingCommitment.id && !form.complete) || (processingCommitment && form.signed && !form.complete && isChainSupported)
             }
         },
         {

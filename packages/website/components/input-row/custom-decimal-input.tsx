@@ -13,6 +13,7 @@ export type InputProps = {
     placeholder: string
     pattern?: string
     className?: string
+    disabled?: boolean
     onChangeInputValue: (value: string) => void
 }
 export const CustomDecimalInput = (props: InputProps) => {

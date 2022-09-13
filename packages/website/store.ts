@@ -47,7 +47,7 @@ type Store = {
   suggestedPrice: number
   setSuggestedPrice: (newPrice: number) => void
   swapSettings: SwapSettings
-  updateSwapSetting: (key: keyof SwapSettings, value: any) => void
+  updateSwapSetting: <K extends keyof SwapSettings>(key: K, value: SwapSettings[K] ) => void
   resetSwapSettings: () => void
   priceFromAPI: number
   setPriceFromAPI: (newPriceFromAPI: number) => void
@@ -55,7 +55,7 @@ type Store = {
   setUserPrice: (newUserPrice: string) => void
   form: FormType
   setForm: (newForm: FormType) => void
-  updateFormValue: (key: keyof FormType, value: any) => void
+  updateFormValue: <K extends keyof FormType>(key: K, value: FormType[K]) => void
   resetForm: () => void
   txSecrets: { [txHash: string]: string }
   setTxSecrets: (txHash: string, secret: string) => void
@@ -87,8 +87,8 @@ export const useStore = create<Store>()(
       set => ({
         notification: null,
         form: defaultForm,
-        setForm: (newForm: FormType) => set({ form: newForm }, false, { type: 'setForm' }),
-        updateFormValue: (key: keyof FormType, value: any) =>
+        setForm: (newForm) => set({ form: newForm }, false, { type: 'setForm' }),
+        updateFormValue: (key, value) =>
           set(
             state => ({
               form: {
@@ -107,19 +107,19 @@ export const useStore = create<Store>()(
             false,
             { type: 'resetForm' }
           ),
-        setNotification: (newErrorForNotification: NotificationType) =>
+        setNotification: (newErrorForNotification) =>
           set({ notification: newErrorForNotification }, false, { type: 'setNotification' }),
         suggestedPrice: 0,
-        setSuggestedPrice: (newPrice: number) =>
+        setSuggestedPrice: (newPrice) =>
           set({ suggestedPrice: newPrice }, false, { type: 'setSuggestedPrice' }),
         priceFromAPI: 0,
-        setPriceFromAPI: (newPriceFromAPI: number) =>
+        setPriceFromAPI: (newPriceFromAPI) =>
           set({ priceFromAPI: newPriceFromAPI }, false, { type: 'setPriceFromAPI' }),
         userPrice: '',
-        setUserPrice: (newPrice: string) => set({ userPrice: newPrice }, false, { type: 'setUserPrice' }),
+        setUserPrice: (newPrice) => set({ userPrice: newPrice }, false, { type: 'setUserPrice' }),
 
         txSecrets: {},
-        setTxSecrets: (txHash: string, secret: string) =>
+        setTxSecrets: (txHash, secret) =>
           set(
             state => ({
               txSecrets: {
@@ -130,7 +130,7 @@ export const useStore = create<Store>()(
             false,
             { type: 'setTxSecrets', txHash, secret }
           ),
-        deleteTxSecrets: (txHash: string) =>
+        deleteTxSecrets: (txHash) =>
           set(
             state => {
               const stateToUpdate = { ...state.txSecrets }
@@ -141,7 +141,7 @@ export const useStore = create<Store>()(
             { type: 'deleteTxSecrets', txHash }
           ),
         swapSecrets: {},
-        setSwapSecrets: (swapId: string, secret: string) =>
+        setSwapSecrets: (swapId, secret) =>
           set(
             state => ({
               swapSecrets: {
@@ -152,7 +152,7 @@ export const useStore = create<Store>()(
             false,
             { type: 'setSwapSecrets', swapId, secret }
           ),
-        deleteSwapSecrets: (swapId: string) =>
+        deleteSwapSecrets: (swapId) =>
           set(
             state => {
               const stateToUpdate = { ...state.swapSecrets }
@@ -169,7 +169,7 @@ export const useStore = create<Store>()(
             processingCommitment: newProcessingCommitment,
           }),
         swapSettings: defaultSwapSettings,
-        updateSwapSetting: (key: keyof SwapSettings, value: any ) =>
+        updateSwapSetting: (key, value ) =>
           set(
             state => ({
               swapSettings: {
@@ -190,7 +190,7 @@ export const useStore = create<Store>()(
           ),
       }),
       {
-        name: 'swapState',
+        name: 'persisted-swap-state',
 
         partialize: state =>
           Object.fromEntries(
@@ -199,7 +199,7 @@ export const useStore = create<Store>()(
       }
     ),
     {
-      name: 'swapState',
+      name: 'devtools-swap',
     }
   )
 )
