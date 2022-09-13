@@ -2,6 +2,7 @@ import { HardhatUserConfig } from "hardhat/config";
 import { config as dotenvConfig } from "dotenv";
 import "@nomicfoundation/hardhat-toolbox";
 import "hardhat-deploy";
+import "hardhat-change-network";
 
 dotenvConfig();
 
@@ -33,7 +34,7 @@ if (isCI) {
     mnemonic: seed,
     path: "m/44'/60'/0'/0",
     initialIndex: 0,
-    count: 10,
+    count: 20,
     passphrase: ""
   };
   config = {
