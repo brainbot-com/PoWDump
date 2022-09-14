@@ -84,6 +84,4 @@ services:
     environment:
       CADDY_INGRESS_NETWORKS: powdump_default
     labels:
-      # TODO remove once verified 
-      caddy.acme_ca: "https://acme-staging-v02.api.letsencrypt.org/directory"
       caddy.email: "devops@brainbot.com"
