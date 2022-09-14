@@ -1,7 +1,9 @@
-name: Release
+name: Release and deploy to IPFS
 on:
-  schedule:
-    - cron: '0 10 * * 1-4' # run 12:00 UTC+2 Monday-Thursday
+  pull_request:
+    types:
+      - closed
+
   workflow_dispatch:
     inputs:
       debug_enabled:
@@ -12,6 +14,7 @@ on:
 
 jobs:
   tag:
+    if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     outputs:
       new_tag: ${{ steps.github-tag-action.outputs.new_tag }}
@@ -26,10 +29,12 @@ jobs:
           # new_tag is only set when there are new semver commits
           # on the release branch
           release_branches: release
-          default_bump: patch
+          # bumps have to be set explicitly
+          default_bump: false
 
   release:
     needs: tag
+    environment: production
     # only release when there is a new tag
     if: ${{ needs.tag.outputs.new_tag != null }}
     runs-on: ubuntu-latest
@@ -38,13 +43,6 @@ jobs:
       - uses: ./.github/actions/setup
       - name: Add .env files
         run: echo ${{secrets.ENV_WEBSITE_BASE64}} | base64 -d > ./packages/website/.env
-
-      - name: Setup tmate session
-        uses: mxschmitt/action-tmate@v3
-        if: ${{ github.event_name == 'workflow_dispatch' && inputs.debug_enabled }}
-        timeout-minutes: 15
-        with:
-          limit-access-to-actor: true
 
       - name: Build
         env:
@@ -55,9 +53,18 @@ jobs:
           yarn workspace @package/dump-pow-website run build
           yarn workspace @package/dump-pow-website run export
 
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+        # only start the session when enable via manual workflow trigger and the previous step failed
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.debug_enabled  && ${{ failure() }}}}
+        timeout-minutes: 15
+        with:
+          limit-access-to-actor: true
+
       - uses: aquiladev/ipfs-action@v0.2.1
         id: upload
         with:
+          path: ./packages/website/out
           service: pinata
           pinataKey: ${{ secrets.PINATA_KEY }}
           pinataSecret: ${{ secrets.PINATA_SECRET }}

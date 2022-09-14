@@ -20,7 +20,7 @@ if (isCI) {
   );
   config = {
     solidity: {
-      version: "0.8.9"
+      version: "0.8.16"
     }
   };
 } else {
