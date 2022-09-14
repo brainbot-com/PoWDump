@@ -24,7 +24,7 @@ import { useEthBalance } from '../../hooks/useEthBalance'
 import { CurrencyAmount } from '@uniswap/sdk-core'
 import { ExtendedEther } from '../../utils/ether'
 import { maxAmountSpend } from '../../utils/maxAmountSpend'
-import {SupportedChainId} from "../../constants/chains";
+import { SupportedChainId } from '../../constants/chains'
 
 const PriceRow = dynamic(() => import('./price-row'), {
   ssr: false,
@@ -115,17 +115,14 @@ export function DumpForm() {
   const claimPeriodInSec: number = useStore(state => state.swapSettings.claimPeriodInSec) || defaultClaimPeriodInSec
   const transactionExpiryTime: number =
     useStore(state => state.swapSettings.transactionDeadlineInSec) || defaultTransactionDeadlineInSec
-  // const [claimPeriodInSec, setClaimPeriodInSec] = React.useState<string | number>(claimPeriodInSec)
   const form = useStore(state => state.form)
   const [ethPoSAmount, setPoSAmount] = useState('0.0')
   const [ethPoWAmount, setPoWAmount] = useState(form.ethPoWAmount)
   const [termsAccepted, setTermsAccepted] = useState(form.termsAccepted)
   const suggestedPrice = useStore(state => state.suggestedPrice)
   const userPrice = useStore(state => state.userPrice)
-
   const setForm = useStore(state => state.setForm)
   const updateFormValue = useStore(state => state.updateFormValue)
-  const resetForm = useStore(state => state.resetForm)
   const setProcessingCommitment = useStore(state => state.setProcessingCommitment)
   const setTxSecrets = useStore(state => state.setTxSecrets)
   const setSwapSecrets = useStore(state => state.setSwapSecrets)
@@ -177,7 +174,7 @@ export function DumpForm() {
       const message = getErrorMessage(e)
       setError(message)
     }
-  }, [account, ethPoWAmount, ethPoSAmount, claimPeriodInSec, termsAccepted, userPrice, suggestedPrice])
+  }, [account, ethPoWAmount, ethPoSAmount, claimPeriodInSec, termsAccepted, userPrice, suggestedPrice, chainId])
 
   const handleClickCommit = async () => {
     try {
@@ -206,7 +203,7 @@ export function DumpForm() {
         hashedSecret: hashedSecret,
         initiator: account as string,
         recipient: ZERO_ADDRESS,
-        endTimeStamp: String(Date.now() + claimPeriodInSec * 1000),
+        endTimeStamp: String(Math.floor((Date.now() + claimPeriodInSec * 1000) / 1000)),
       }
       setProcessingCommitment(subgraphCommitment)
 
@@ -250,25 +247,26 @@ export function DumpForm() {
   }
 
   const currencyAmount = CurrencyAmount.fromRawAmount(
-      // ChainId doesn't really matter here as the currency is ETH (no matter the chainID)
-      ExtendedEther.onCreate(chainId ? chainId : SupportedChainId.MAINNET),
-      // @ts-ignore
-      balance
+    // ChainId doesn't really matter here as the currency is ETH (no matter the chainID)
+    ExtendedEther.onCreate(chainId ? chainId : SupportedChainId.MAINNET),
+    // @ts-ignore
+    balance
   )
 
   const maxAmount = maxAmountSpend(currencyAmount)
-  const maxAmountFormatted = maxAmount ? maxAmount.toExact() : "0"
+  const maxAmountFormatted = maxAmount ? maxAmount.toExact() : '0'
 
   return (
     <>
       <div>
-        <div className={"relative"}>
-          <div className="flex flex-col rounded-md bg-brown-orange pt-3 border border-1 border-transparent hover:border-gray focus-within:border-gray">
-
-          <div className={"flex"}>
-            <div className={" flex-1 w-72"}>
-              <CustomDecimalInput
-                  className={"appearance-none outline-none bg-brown-orange text-2xl text-white pl-4 group-hover:text-white"}
+        <div className={'relative'}>
+          <div className="flex flex-col rounded-md bg-brown-orange pt-4 border border-1 border-transparent hover:border-gray focus-within:border-gray">
+            <div className={'flex'}>
+              <div className={'flex-1 w-72'}>
+                <CustomDecimalInput
+                  className={
+                    'appearance-none outline-none bg-brown-orange text-2xl text-white pl-4 group-hover:text-white'
+                  }
                   id="pow-amount"
                   value={ethPoWAmount}
                   onChangeInputValue={value => {
@@ -279,26 +277,28 @@ export function DumpForm() {
                   type="text"
                   placeholder="0.0"
                   pattern={'^[0-9]*[.,]?[0-9]*$'}
-              />
+                />
+              </div>
+              <div className={'mr-5 bg-brown-orange pl-2'}>
+                <CurrencyBadge icon={PowDumpSmallLogo} name={'PoW ETH'} />
+              </div>
             </div>
-            <div className={"mr-5 bg-brown-orange pl-2"}>
-              <CurrencyBadge icon={PowDumpSmallLogo} name={'PoW ETH'} />
-            </div>
-          </div>
 
             <div className={'flex flex-row justify-end items-center mr-5 text-gray text-sm mb-2'}>
               Balance: {currencyAmount.toFixed(5)}
               {maxAmountFormatted === ethPoWAmount ? null : (
-                  <button
-                      disabled={!isSwapEnabled}
-                      className={'bg-gray-500 border border-0 border-transparent rounded-sm px-2 text-gray hover:cursor-pointer hover:text-white hover:border-white hover:bg-rich-black-lighter ml-1'}
-                      onClick={() => {
-                        setPoWAmount(maxAmountFormatted)
-                        updateFormValue('ethPoWAmount', maxAmountFormatted)
-                      }}
-                  >
-                    Max
-                  </button>
+                <button
+                  disabled={!isSwapEnabled}
+                  className={
+                    'bg-gray-500 border border-0 border-transparent rounded-sm px-2 text-gray hover:cursor-pointer hover:text-white hover:border-white hover:bg-rich-black-lighter ml-1'
+                  }
+                  onClick={() => {
+                    setPoWAmount(maxAmountFormatted)
+                    updateFormValue('ethPoWAmount', maxAmountFormatted)
+                  }}
+                >
+                  Max
+                </button>
               )}
             </div>
           </div>
@@ -329,8 +329,8 @@ export function DumpForm() {
           the specified PoW ETH amount.
         </p>
         <p className={'pt-2 text-sm text-gray'}>
-          If PoWDump can not execute the trade within the subsequent 45 PoW Chain blocks, you can reclaim the locked PoW
-          ETH**.
+          If once the transaction is mined, no one matches it on Ethereum Mainnet (PoS) after{' '}
+          {Math.floor(claimPeriodInSec / 60)} minutes you can withdraw the locked PoW ETH**.
         </p>
 
         <label className={'text-sm pt-2'}>

@@ -5,6 +5,7 @@ import { AddressZero } from "@ethersproject/constants";
 import { getConfig } from "./config";
 import { formatEther } from "ethers/lib/utils";
 import Queue from "better-queue";
+import { fromUnixTime, getUnixTime, subSeconds } from "date-fns";
 
 type SwapCommitment = {
   id: string;
@@ -152,10 +153,10 @@ const match = async (swapCommitment: SwapCommitment) => {
 
   if (
     endTimeStamp.lt(
-      BigNumber.from(Math.floor((Date.now() + 1000 * 60 * 3) / 1000))
+      BigNumber.from(Math.floor((Date.now() + 1000 * 60 * 1) / 1000))
     )
   ) {
-    throw new Error(`> Source commitment ${id} appears to be expired`);
+    throw new Error(`> Source commitment ${id} expires in less than 3 minutes`);
   }
 
   const sourceContract = config.source.contract;
@@ -192,9 +193,11 @@ const match = async (swapCommitment: SwapCommitment) => {
 
   console.log(`> Trying to add commitment ${id} on target chain`);
   const fee = await ethSwapContractOnTarget.feeFromSwapValue(expectedAmount);
+  // 3 minutes should be more than enough time for the bot to reveal the secret on the PoS chain
+  const expireAt = getUnixTime(subSeconds(fromUnixTime(endTimeStamp.toNumber()), 1*60))
   const commitmentOnTargetResponse = await ethSwapContractOnTarget[
     "commit(uint64,bytes32,uint256,uint256,address)"
-  ](endTimeStamp, hashedSecret, expectedAmount, value, initiator, {
+  ](expireAt, hashedSecret, expectedAmount, value, initiator, {
     value: expectedAmount.add(fee)
   });
 

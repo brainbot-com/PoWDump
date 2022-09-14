@@ -16,7 +16,6 @@ export default function NetworksDropdown() {
   const [unsupportedNetwork, setUnsupportedNetwork] = useState(false)
   const { connector, provider, chainId } = useWeb3React()
 
-  console.log('chainId networks dropdown', chainId)
   useEffect(() => {
     const getNetwork = async () => {
       if (provider) {

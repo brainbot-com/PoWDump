@@ -36,3 +36,10 @@ export async function claim(secret: string, signer: JsonRpcSigner) {
 
   return txResponse
 }
+
+export async function refund(swapId:string, signer: JsonRpcSigner) {
+    const ethSwapContract = getPoWSwapContract(signer)
+    const txResponse: TransactionResponse = await ethSwapContract.refund(swapId)
+
+    return txResponse
+}
