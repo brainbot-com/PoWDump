@@ -11,7 +11,7 @@ import { randomBytes } from '@ethersproject/random'
 import { keccak256 } from '@ethersproject/keccak256'
 import { ZERO_ADDRESS } from '../../config'
 import { commit } from '../../utils/eth-swap'
-import { InputRow } from '../input-row'
+import { CustomDecimalInput } from '../input-row'
 import { CurrencyBadge } from './currency-badge'
 // @ts-ignore
 import PowDumpSmallLogo from '../../public/assets/images/powdump_dapp_small_pow.png'
@@ -19,7 +19,12 @@ import PowDumpSmallLogo from '../../public/assets/images/powdump_dapp_small_pow.
 import EthereumLogo from '../../public/assets/images/ethereum-logo.png'
 import { Button } from '../button'
 import dynamic from 'next/dynamic'
-import {isSwapSupportedOnChain} from "../../utils/helpers";
+import { isSwapSupportedOnChain } from '../../utils/helpers'
+import { useEthBalance } from '../../hooks/useEthBalance'
+import { CurrencyAmount } from '@uniswap/sdk-core'
+import { ExtendedEther } from '../../utils/ether'
+import { maxAmountSpend } from '../../utils/maxAmountSpend'
+import {SupportedChainId} from "../../constants/chains";
 
 const PriceRow = dynamic(() => import('./price-row'), {
   ssr: false,
@@ -37,7 +42,7 @@ const errorsTranslations = {
   [NO_POS_AMOUNT_ENTERED as string]: 'Enter expected PoS amount',
   [TERMS_NOT_ACCEPTED as string]: 'Accept terms and conditions',
   [PRICE_CANT_BE_ZERO as string]: "Price can't be 0",
-  [SWAP_NOT_SUPPORTED_ON_CHAIN as string]: "Chain not supported for starting a swap",
+  [SWAP_NOT_SUPPORTED_ON_CHAIN as string]: 'Chain not supported for starting a swap',
 }
 
 type Props = {
@@ -65,7 +70,7 @@ const validateForm = ({
     throw new Error(NO_WALLET_CONNECTED)
   }
 
-  if(!chainId || !isSwapSupportedOnChain(chainId)) {
+  if (!chainId || !isSwapSupportedOnChain(chainId)) {
     throw new Error('SWAP_NOT_SUPPORTED_ON_CHAIN')
   }
 
@@ -127,6 +132,7 @@ export function DumpForm() {
   const deleteTxSecrets = useStore(state => state.deleteTxSecrets)
   const setNotification = useStore(state => state.setNotification)
   const { account, provider, chainId } = useWeb3React<Web3Provider>()
+  const { balance } = useEthBalance()
 
   const [error, setError] = useState('')
 
@@ -243,25 +249,66 @@ export function DumpForm() {
     }
   }
 
+  const currencyAmount = CurrencyAmount.fromRawAmount(
+      // ChainId doesn't really matter here as the currency is ETH (no matter the chainID)
+      ExtendedEther.onCreate(chainId ? chainId : SupportedChainId.MAINNET),
+      // @ts-ignore
+      balance
+  )
+
+  const maxAmount = maxAmountSpend(currencyAmount)
+  const maxAmountFormatted = maxAmount ? maxAmount.toExact() : "0"
+
   return (
     <>
-      <InputRow
-        id="pow-amount"
-        value={ethPoWAmount}
-        onChangeInputValue={value => {
-          setPoWAmount(value)
-          updateFormValue('ethPoWAmount', value)
-        }}
-        disabled={!isSwapEnabled}
-        type="text"
-        placeholder="0.0"
-        pattern={'^[0-9]*[.,]?[0-9]*$'}
-        append={<CurrencyBadge icon={PowDumpSmallLogo} name={'PoW ETH'} />}
-      />
+      <div>
+        <div className={"relative"}>
+          <div className="flex flex-col rounded-md bg-brown-orange pt-3 border border-1 border-transparent hover:border-gray focus-within:border-gray">
+
+          <div className={"flex"}>
+            <div className={" flex-1 w-72"}>
+              <CustomDecimalInput
+                  className={"appearance-none outline-none bg-brown-orange text-2xl text-white pl-4 group-hover:text-white"}
+                  id="pow-amount"
+                  value={ethPoWAmount}
+                  onChangeInputValue={value => {
+                    setPoWAmount(value)
+                    updateFormValue('ethPoWAmount', value)
+                  }}
+                  disabled={!isSwapEnabled}
+                  type="text"
+                  placeholder="0.0"
+                  pattern={'^[0-9]*[.,]?[0-9]*$'}
+              />
+            </div>
+            <div className={"mr-5 bg-brown-orange pl-2"}>
+              <CurrencyBadge icon={PowDumpSmallLogo} name={'PoW ETH'} />
+            </div>
+          </div>
+
+            <div className={'flex flex-row justify-end items-center mr-5 text-gray text-sm mb-2'}>
+              Balance: {currencyAmount.toFixed(5)}
+              {maxAmountFormatted === ethPoWAmount ? null : (
+                  <button
+                      disabled={!isSwapEnabled}
+                      className={'bg-gray-500 border border-0 border-transparent rounded-sm px-2 text-gray hover:cursor-pointer hover:text-white hover:border-white hover:bg-rich-black-lighter ml-1'}
+                      onClick={() => {
+                        setPoWAmount(maxAmountFormatted)
+                        updateFormValue('ethPoWAmount', maxAmountFormatted)
+                      }}
+                  >
+                    Max
+                  </button>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div className="w-full">
         <div className="flex flex-col rounded-md dark:bg-rich-black-lighter pt-2 border border-1 border-rich-black-lightest">
           <div className="flex flex-row my-2">
-            <div className={`flex-1 mx-5 ${!isSwapEnabled ? "text-gray" : ""}`}>
+            <div className={`flex-1 mx-5 ${!isSwapEnabled ? 'text-gray' : ''}`}>
               <PriceRow />
               <div className={'h-px bg-rich-black-lightest my-2'}></div>
 
@@ -300,7 +347,7 @@ export function DumpForm() {
               updateFormValue('termsAccepted', !termsAccepted)
             }}
           />{' '}
-          <span className={!isSwapEnabled ? "text-gray" : ""}>I understand and accept the Terms & Conditions</span>
+          <span className={!isSwapEnabled ? 'text-gray' : ''}>I understand and accept the Terms & Conditions</span>
         </label>
       </div>
 
