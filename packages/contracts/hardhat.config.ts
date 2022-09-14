@@ -28,7 +28,7 @@ if (isCI) {
   const pos_url = (process.env.POS_URL as string) || "http://localhost:8545";
   const etherscan_goerli_api_key = (process.env.ETHERSCAN_GOERLI_API_KEY as string) || "";
 
-  const seed = process.env.PRIVKEY_MNEMONIC as string;
+  const seed = process.env.PRIVKEY_MNEMONIC as string || "test test test test test test test test test test test junk";
   const default_accounts = {
     mnemonic: seed,
     path: "m/44'/60'/0'/0",
