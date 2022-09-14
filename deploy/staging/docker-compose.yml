@@ -29,7 +29,7 @@ services:
     profiles: ["tools"]
     build:
       dockerfile: Dockerfile 
-      context: ..
+      context: ../..
     entrypoint:
       - npx
       - graph

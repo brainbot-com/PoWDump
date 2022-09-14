@@ -13,7 +13,7 @@ if ! command -v jq &> /dev/null; then
 fi
 
 if [[ -z "${SUBGRAPH_VERSION}" ]]; then
-    SUBGRAPH_VERSION="v$(jq -r '.version' <../packages/contracts/package.json)"
+    SUBGRAPH_VERSION="v$(jq -r '.version' <../../packages/contracts/package.json)"
 fi
 
 # FIXME this is not very flexible when the contract name changes!
