@@ -26,10 +26,12 @@ jobs:
           # new_tag is only set when there are new semver commits
           # on the release branch
           release_branches: release
-          default_bump: patch
+          # bumps have to be set explicitly
+          default_bump: false
 
   release:
     needs: tag
+    environment: production
     # only release when there is a new tag
     if: ${{ needs.tag.outputs.new_tag != null }}
     runs-on: ubuntu-latest
@@ -58,6 +60,7 @@ jobs:
       - uses: aquiladev/ipfs-action@v0.2.1
         id: upload
         with:
+          path: ./packages/website/out
           service: pinata
           pinataKey: ${{ secrets.PINATA_KEY }}
           pinataSecret: ${{ secrets.PINATA_SECRET }}
