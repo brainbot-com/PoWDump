@@ -1,7 +1,78 @@
+// SPDX-License-Identifier: MIT
 pragma solidity 0.8.16;
 
 import "hardhat/console.sol";
 
+/**
+ * @dev EtherSwap is a contract for swapping Ether across chains.
+ *
+ *
+ * This contract should be deployed on the chains you want to swap Ether on.
+ *
+ *
+ * How does a swap work?
+ *
+ * A user would announce his intention to swap Ether on a chain by calling the
+ * contract's overloaded {commit} function with:
+ *  - `msg.value` equal to the contract's `fee` + `_payout`
+ *  - `_expectedAmount` the expected amount of ether to receive on the target
+ *     chain, the duration
+ *  - `_lockTimeSec` the duration the swap offer is valid
+ *  - `_secretHash` the hash of the secret that will be revealed to claim the
+ *    swap
+ *  - `_payout` the amount of ether to be paid to the counterparty claiming the
+ *    swap
+ *  - `_recipient` either set to the ZERO_ADDRESS (if counterparty is unknown) or
+ *    to the address of the counterparty
+ *
+ * A counterparty that wants to match this trade would first have to check
+ * whether the duration of the offer is enough for him to complete the swap.
+ * If so, he would call the {changeRecipient} function to designate himself as
+ * the recipient of the funds locked for this trade.
+ *
+ * Then he would call the {commit} function on the target chain with:
+ *  - `msg.sender` set to the same address that was used in `changeRecipient`
+ *  - `_recipient` set to the user who created the swap on the source chain
+ *  - `_expectedAmount` expected amount of ether to receive should be set to the
+ *    amount of ether locked in source chain swap
+ *  - `_swapEndTimestamp` the duration should be set to a value lower than the
+ *    source swap's endTimeStamp (if source endTimeStamp is bigger than
+ *    recipientChangeLockDuration, the endTimestamp should be set to a value
+ *    lower than recipientChangeLockDuration)
+ *  - `_hashedSecret` should be set to the same value as the source swap's
+ *    `_hashedSecret`.
+ *
+ * Once the target swap is created, the user who created the source swap would
+ * make sure that the target swap is created with the expected params and then
+ * call the {claim} function on the target chain with the secret that was used
+ * to create the source swap. If the secret is correct the user would  receive
+ * the amount of ether locked on the target chain.
+ *
+ * Now the counterparty knows the secret and can call the `claim` function on
+ * the source chain with it. This call should happen within the endTimestamp
+ * of the source swap. If that is the case the counterparty would receive the
+ * amount of ether locked on the source chain. If the counterparty calls the
+ * {claim} function after the endTimestamp of the source swap has passed he
+ * won't receive any funds.
+ *
+ * ATTENTION: A counterparty matching a swap should make sure to have enough
+ * time to submit the proof once it is being revealed by the user. Failure to
+ * submit the {claim} transaction in time would result in the counterparty not
+ * receiving any funds on the source chain.
+ *
+ * How does a refund work?
+ *
+ * If a swap didn't occur, once the endTimestamp of the swap has passed, the
+ * parties can call the {refund} function to receive their funds back.
+ *
+ * Fees
+ *
+ * The contract can be deployed with a _feePerMillion value. This value would
+ * indicate the amount of ETH that would be taken from the amount of ETH locked.
+ *
+ * The accrued fees can be sent to the _feeRecipient address by calling the
+ * {withdrawFees} function.
+ */
 contract EtherSwap {
 
     struct Swap {
@@ -43,17 +114,18 @@ contract EtherSwap {
         payable(tx.origin).transfer(address(this).balance);
     }
 
-    /// Commit to swap
-    ///
-    /// This function can be directly called by users matching an already committed to swap
-    /// that know the end timestamp and recipient they should use.
-    ///
-    /// @param _swapEndTimestamp the timestamp at which the commit expires
-    /// @param _hashedSecret the hashed secret
-    /// @param _payout the value paid to the counterparty claiming the swap
-    /// @param _expectedAmount the value expected by the committer in return for _payout
-    /// @param _recipient the recipient of the swap
-    ///        can be the zero address
+    /**
+    * @dev Commit to swap
+    *
+    * This function can be directly called by users matching an already committed swap
+    * and they know the end timestamp and recipient they should use.
+    *
+    * @param _swapEndTimestamp the timestamp at which the commit expires
+    * @param _hashedSecret the hashed secret
+    * @param _payout the value paid to the counterparty claiming the swap
+    * @param _expectedAmount the value expected by the committer in return for _payout
+    * @param _recipient the recipient of the swap - can be the zero address
+    */
     function commit(uint64 _swapEndTimestamp, bytes32 _hashedSecret, uint256 _payout, uint256 _expectedAmount, address payable _recipient) public payable {
         require(block.timestamp < _swapEndTimestamp, "Swap end timestamp must be in the future");
         require(_payout != 0, "Cannot commit to 0 payout");
@@ -82,31 +154,35 @@ contract EtherSwap {
         numberOfSwaps = numberOfSwaps + 1;
     }
 
-    /// Commit to swap
-    ///
-    /// This function can be called by users uncertain as to when their transaction will be minted
-    ///
-    /// @param _transactionExpiryTime the timestamp at which the transaction expires
-    ///        used to make sure the user does not see himself committed later than expected
-    /// @param _lockTimeSec the duration of the swap lock
-    ///        swap will expire at block.timestamp + _lockTimeSec
-    /// @param _hashedSecret the hashed secret
-    /// @param _payout the value paid to the counterparty claiming the swap
-    /// @param _expectedAmount the value expected by the committer in return for _payout
-    /// @param _recipient the recipient of the swap
-    ///        can be the zero address
+    /**
+    * @dev Commit to swap
+    *
+    * This function can be called by users uncertain as to when their transaction will be mined
+    *
+    * @param _transactionExpiryTime the timestamp at which the transaction expires
+    *        used to make sure the user does not see himself committed later than expected
+    * @param _lockTimeSec the duration of the swap lock
+    *        swap will expire at block.timestamp + _lockTimeSec
+    * @param _hashedSecret the hashed secret
+    * @param _payout the value paid to the counterparty claiming the swap
+    * @param _expectedAmount the value expected by the committer in return for _payout
+    * @param _recipient the recipient of the swap
+    *        can be the zero address
+    */
     function commit(uint64 _transactionExpiryTime, uint64 _lockTimeSec, bytes32 _hashedSecret, uint256 _payout, uint256 _expectedAmount, address payable _recipient) external payable {
         require(block.timestamp < _transactionExpiryTime, "Transaction no longer valid");
         commit(uint64(block.timestamp) + _lockTimeSec, _hashedSecret, _payout, _expectedAmount, _recipient);
     }
 
-    /// Change recipient of an existing swap
-    ///
-    /// Call this function when you want to match a swap to set yourself as
-    /// the recipient of the swap for `recipientChangeLockDuration` seconds
-    ///
-    /// @param _swapId the swap id
-    /// @param _recipient the recipient to be set
+    /**
+    * @dev Change recipient of an existing swap
+    *
+    * Call this function when you want to match a swap to set yourself as
+    * the recipient of the swap for `recipientChangeLockDuration` seconds
+    *
+    * @param _swapId the swap id
+    * @param _recipient the recipient to be set
+    */
     function changeRecipient(uint32 _swapId, address payable _recipient) external {
         require(_swapId < numberOfSwaps, "No swap with corresponding id");
         require(swaps[_swapId].changeRecipientTimestamp <= block.timestamp, "Cannot change recipient: timestamp");
@@ -117,12 +193,14 @@ contract EtherSwap {
         emit ChangeRecipient(_recipient, _swapId);
     }
 
-    /// Claim a swap
-    ///
-    /// Claim a swap to sent its locked value to its recipient by revealing the hashed secret
-    ///
-    /// @param _id the swap id
-    /// @param _proof the proof that once hashed produces the `hashedSecret` committed to in the swap
+    /**
+    * @dev Claim a swap
+    *
+    * Claim a swap to sent its locked value to its recipient by revealing the hashed secret
+    *
+    * @param _id the swap id
+    * @param _proof the proof that once hashed produces the `hashedSecret` committed to in the swap
+    */
     function claim(uint32 _id, bytes32 _proof) external {
         require(_id < numberOfSwaps, "No swap with corresponding id");
 
@@ -140,13 +218,15 @@ contract EtherSwap {
         emit Claim(swap.recipient, swap.value, _proof, _id);
     }
 
-    /// Refund a swap
-    ///
-    /// Refund an expired swap by transferring back its locked value to the swap initiator.
-    /// Requires the swap to be expired.
-    /// Also reimburses the eventual fee locked for the swap.
-    ///
-    /// @param id the swap id
+    /**
+    * @dev Refund a swap
+    *
+    * Refund an expired swap by transferring back its locked value to the swap initiator.
+    * Requires the swap to be expired.
+    * Also reimburses the eventual fee locked for the swap.
+    *
+    * @param _id the swap id
+    */
     function refund(uint32 id) external {
         require(id < numberOfSwaps, "No swap with corresponding id");
         require(swaps[id].endTimeStamp < block.timestamp, "TimeStamp violation");
@@ -162,9 +242,11 @@ contract EtherSwap {
         emit Refund(id);
     }
 
-    /// Withdraw the fees
-    ///
-    /// Send the total collected fees to the `feeRecipient` address.
+    /*
+    * @dev Withdraw the fees
+    *
+    * Send the total collected fees to the `feeRecipient` address.
+    */
     function withdrawFees() external {
         uint256 toTransfer = collectedFees;
         collectedFees = 0;
@@ -172,9 +254,11 @@ contract EtherSwap {
         emit WithdrawFees(toTransfer);
     }
 
-    /// Clean a swap from storage
-    ///
-    /// @param id the swap id
+    /**
+    * @dev Clean a swap from storage
+    *
+    * @param _id the swap id
+    */
     function clean(uint32 id) private {
         Swap storage swap = swaps[id];
         delete swap.hashedSecret;
@@ -187,16 +271,14 @@ contract EtherSwap {
         delete swaps[id];
     }
 
-    /// Get the fee paid for a swap from its swap value
-    /// msg.value = swap value + fee
-    ///
-    /// @param value the swap value
-    /// @return the fee paid for the swap
-    function feeFromSwapValue(uint256 value) public view returns(uint256) {
+    /**
+    * @dev Get the fee paid for a swap from its swap value
+    *
+    * @param _value the swap value
+    * @return the fee paid for the swap
+    */
+    function feeFromSwapValue(uint256 value) public view returns (uint256) {
         uint256 fee = value * feePerMillion / 1_000_000;
         return fee;
     }
 }
-
-
-// SPDX-License-Identifier: MIT
