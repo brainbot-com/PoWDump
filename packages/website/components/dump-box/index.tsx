@@ -1,8 +1,6 @@
 export {DumpBox} from './dump-box'
 export { Settings } from './dump-settings'
 export { InputRow } from '../input-row/input-row'
-export {SearchSwap} from "./search-swap";
-export {SearchRecipient} from "./search-recipient";
 export {Status} from "./status";
 export {Deal} from "./deal";
 export {CopyToClipboard} from "./copy-to-clipboard";

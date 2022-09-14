@@ -81,7 +81,7 @@ export const PriceRow = () => {
         {userPrice !== '' ? (
           Number(userPrice).toFixed(6)
         ) : (
-          <SuggestedPriceTooltipHelp price={String(priceFromAPI)}  strategy={"absolute"} isReferenceHidden={false}>
+          <SuggestedPriceTooltipHelp price={String(priceFromAPI)}  strategy={"absolute"}>
             <div className={'border-b border-dotted hover:cursor-pointer'}>{suggestedPrice} ETH</div>
           </SuggestedPriceTooltipHelp>
         )}
