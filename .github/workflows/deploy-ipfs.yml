@@ -1,0 +1,74 @@
+name: Release
+on:
+  schedule:
+    - cron: '0 10 * * 1-4' # run 12:00 UTC+2 Monday-Thursday
+  workflow_dispatch:
+    inputs:
+      debug_enabled:
+        type: boolean
+        description: 'Run the build with tmate debugging enabled (https://github.com/marketplace/actions/debugging-with-tmate)'     
+        required: false
+        default: false
+
+jobs:
+  tag:
+    runs-on: ubuntu-latest
+    outputs:
+      new_tag: ${{ steps.github-tag-action.outputs.new_tag }}
+      changelog: ${{ steps.github-tag-action.outputs.changelog }}
+    steps:
+      - uses: actions/checkout@v3
+      - name: Bump and tag
+        id: github-tag-action
+        uses: mathieudutour/github-tag-action@v6.0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          # new_tag is only set when there are new semver commits
+          # on the release branch
+          release_branches: release
+          default_bump: patch
+
+  release:
+    needs: tag
+    # only release when there is a new tag
+    if: ${{ needs.tag.outputs.new_tag != null }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/setup
+      - name: Add .env files
+        run: echo ${{secrets.ENV_WEBSITE_BASE64}} | base64 -d > ./packages/website/.env
+
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.debug_enabled }}
+        timeout-minutes: 15
+        with:
+          limit-access-to-actor: true
+
+      - name: Build
+        env:
+          CI: true
+        run: |
+          yarn
+          yarn workspace @package/dump-pow-contracts compile
+          yarn workspace @package/dump-pow-website run build
+          yarn workspace @package/dump-pow-website run export
+
+      - uses: aquiladev/ipfs-action@v0.2.1
+        id: upload
+        with:
+          service: pinata
+          pinataKey: ${{ secrets.PINATA_KEY }}
+          pinataSecret: ${{ secrets.PINATA_SECRET }}
+
+      - name: Release
+        uses: actions/create-release@v1.1.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ needs.tag.outputs.new_tag }}
+          release_name: Release ${{ needs.tag.outputs.new_tag }}
+          body: |
+
+            ${{ needs.tag.outputs.changelog }}
