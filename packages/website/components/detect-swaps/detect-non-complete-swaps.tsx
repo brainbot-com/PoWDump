@@ -65,8 +65,8 @@ export const DetectNonCompleteSwaps = () => {
           const log = getCommitLog(txReceipt)
 
           if (log.name === 'Commit') {
-            if (log.args.id) {
-              setSwapSecrets(log.args.id, txSecrets[txHash])
+            if (log.args && typeof log.args.id === 'number' && log.args.id >= 0) {
+              setSwapSecrets(String(log.args.id), txSecrets[txHash])
             }
           }
 
