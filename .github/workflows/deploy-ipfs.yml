@@ -14,7 +14,7 @@ on:
 
 jobs:
   tag:
-    if: github.event.pull_request.merged == true
+    if: ${{ github.event.pull_request.merged == true || github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-latest
     outputs:
       new_tag: ${{ steps.github-tag-action.outputs.new_tag }}
