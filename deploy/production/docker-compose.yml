@@ -12,8 +12,11 @@ services:
       postgres_pass: let-me-in
       postgres_db: graph-node
       ipfs: 'ipfs:5001'
-      ethereum: "pos:${POS_ETHURL} pow:${POW_ETHURL}"
+      ethereum: "mainnet:${MAINNET_ETHURL} ethw:${ETHW_ETHURL} etf:${ETF_ETHURL}"
       GRAPH_LOG: info
+      # can be "index-node", "query-node" or "combined-node"
+      node_role: "${GRAPH_NODE_ROLE}"
+      node_id: "${GRAPH_NODE_ID}"
     labels:
       caddy: graph.powdump.com
       caddy.reverse_proxy: "{{upstreams 8000}}"

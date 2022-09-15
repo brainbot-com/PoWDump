@@ -26,8 +26,7 @@ $DC run --no-deps --rm hardhat compile
 
 # Codegen generates AssemblyScript types for smart contract ABIs and the subgraph schema.
 $DC run --no-deps --rm graph-cli codegen --output-dir generated/
-for network in pos pow; do
-  # TODO copy networks.json, subgraph.yaml to the build folders as well
+for network in $DEPLOY_NETWORKS; do
 
   # Build compiles a subgraph to WebAssembly.
   $DC run --no-deps --rm graph-cli build \
