@@ -26,6 +26,7 @@ import { ExtendedEther } from '../../utils/ether'
 import { maxAmountSpend } from '../../utils/maxAmountSpend'
 import { SupportedChainId } from '../../constants/chains'
 import {getChainInfo} from "../../constants/chainInfo";
+import Link from 'next/link'
 
 const PriceRow = dynamic(() => import('./price-row'), {
   ssr: false,
@@ -355,9 +356,9 @@ export function DumpForm() {
           />{' '}
           <span className={!isSwapEnabled ? 'text-gray' : ''}>
             I understand and accept the{' '}
-            <a href={'/terms_and_conditions'} target={'_blank'} rel="noreferrer" className={'underline'}>
+            <Link href={'/terms_and_conditions'} target={'_blank'} rel="noreferrer" className={'underline'}>
               Terms & Conditions
-            </a>
+            </Link>
           </span>
         </label>
       </div>
