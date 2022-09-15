@@ -196,6 +196,7 @@ export function DumpForm() {
 
       const requestedEthAmount = String(ethPoSAmount)
       updateFormValue('isCommitting', true)
+      updateFormValue('chainId', String(chainId))
 
       const subgraphCommitment = {
         value: parseEther(ethPoWAmount).toString(),
