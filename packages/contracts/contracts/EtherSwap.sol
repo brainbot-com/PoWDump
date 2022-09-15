@@ -225,7 +225,7 @@ contract EtherSwap {
     * Requires the swap to be expired.
     * Also reimburses the eventual fee locked for the swap.
     *
-    * @param _id the swap id
+    * @param id the swap id
     */
     function refund(uint32 id) external {
         require(id < numberOfSwaps, "No swap with corresponding id");
@@ -257,7 +257,7 @@ contract EtherSwap {
     /**
     * @dev Clean a swap from storage
     *
-    * @param _id the swap id
+    * @param id the swap id
     */
     function clean(uint32 id) private {
         Swap storage swap = swaps[id];
@@ -274,7 +274,7 @@ contract EtherSwap {
     /**
     * @dev Get the fee paid for a swap from its swap value
     *
-    * @param _value the swap value
+    * @param value the swap value
     * @return the fee paid for the swap
     */
     function feeFromSwapValue(uint256 value) public view returns (uint256) {
