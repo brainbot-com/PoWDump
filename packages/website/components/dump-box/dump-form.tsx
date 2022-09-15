@@ -25,6 +25,7 @@ import { CurrencyAmount } from '@uniswap/sdk-core'
 import { ExtendedEther } from '../../utils/ether'
 import { maxAmountSpend } from '../../utils/maxAmountSpend'
 import { SupportedChainId } from '../../constants/chains'
+import {getChainInfo} from "../../constants/chainInfo";
 
 const PriceRow = dynamic(() => import('./price-row'), {
   ssr: false,
@@ -130,6 +131,7 @@ export function DumpForm() {
   const setNotification = useStore(state => state.setNotification)
   const { account, provider, chainId } = useWeb3React<Web3Provider>()
   const { balance } = useEthBalance()
+  const chainInfo = getChainInfo(chainId)
 
   const [error, setError] = useState('')
 
@@ -219,19 +221,17 @@ export function DumpForm() {
         provider?.getSigner(account)
       )
 
-      setForm({
-        ...form,
-        signed: true,
-      })
-      setTxSecrets(txResponse.hash, secret)
+      updateFormValue('signed', true)
+
+      setTxSecrets(txResponse.hash, secret, String(chainId))
 
       updateFormValue('txHash', txResponse.hash)
       const txReceipt = await txResponse.wait()
 
       const swapId = getSwapIdFromTxReceipt(txReceipt)
 
-      setSwapSecrets(swapId, secret)
-      deleteTxSecrets(txResponse.hash)
+      setSwapSecrets(swapId, secret, String(chainId))
+      deleteTxSecrets(txResponse.hash, String(chainId))
 
       setProcessingCommitment({
         ...subgraphCommitment,
@@ -265,7 +265,7 @@ export function DumpForm() {
               <div className={'flex-1 w-72'}>
                 <CustomDecimalInput
                   className={
-                    'appearance-none outline-none bg-brown-orange text-2xl text-white pl-4 group-hover:text-white'
+                    'appearance-none outline-none bg-brown-orange text-2xl text-white pl-4 group-hover:text-white rounded-md'
                   }
                   id="pow-amount"
                   value={ethPoWAmount}
@@ -280,27 +280,32 @@ export function DumpForm() {
                 />
               </div>
               <div className={'mr-5 bg-brown-orange pl-2'}>
-                <CurrencyBadge icon={PowDumpSmallLogo} name={'PoW ETH'} />
+
+                {isSwapEnabled && chainInfo ? <CurrencyBadge icon={PowDumpSmallLogo} name={chainInfo?.nativeCurrency?.symbol} /> : null}
               </div>
             </div>
 
-            <div className={'flex flex-row justify-end items-center mr-5 text-gray text-sm mb-2'}>
-              Balance: {currencyAmount.toFixed(5)}
-              {maxAmountFormatted === ethPoWAmount ? null : (
-                <button
-                  disabled={!isSwapEnabled}
-                  className={
-                    'bg-gray-500 border border-0 border-transparent rounded-sm px-2 text-gray hover:cursor-pointer hover:text-white hover:border-white hover:bg-rich-black-lighter ml-1'
-                  }
-                  onClick={() => {
-                    setPoWAmount(maxAmountFormatted)
-                    updateFormValue('ethPoWAmount', maxAmountFormatted)
-                  }}
-                >
-                  Max
-                </button>
-              )}
-            </div>
+            {isSwapEnabled ?
+                <div className={'flex flex-row justify-end items-center mr-5 text-gray text-sm mb-2'}>
+                  Balance: {currencyAmount.toFixed(5)}
+                  {maxAmountFormatted === ethPoWAmount ? null : (
+                      <button
+                          disabled={!isSwapEnabled}
+                          className={
+                            'bg-gray-500 border border-0 border-transparent rounded-sm px-2 text-gray hover:cursor-pointer hover:text-white hover:border-white hover:bg-rich-black-lighter ml-1'
+                          }
+                          onClick={() => {
+                            setPoWAmount(maxAmountFormatted)
+                            updateFormValue('ethPoWAmount', maxAmountFormatted)
+                          }}
+                      >
+                        Max
+                      </button>
+                  )}
+                </div>
+                :
+                <div>&nbsp;</div>
+            }
           </div>
         </div>
       </div>

@@ -5,11 +5,13 @@ import { ChevronDownIcon, ExclamationTriangleIcon as ExclamationIcon } from '@he
 import { classNames } from '../../utils/tailwind'
 import { switchChain } from '../../utils/switchChain'
 import { useWeb3React } from '@web3-react/core'
-import { ALL_SUPPORTED_CHAIN_IDS, isSupportedChain } from '../../constants/chains'
+import { isSupportedChain, SupportedChainId } from '../../constants/chains'
 import { getChainInfo } from '../../constants/chainInfo'
 import { useStore } from '../../store'
+import config from '../../config'
 import { getErrorMessage } from '../../utils/error'
-import config from "../../config";
+
+const NETWORK_SELECTOR_CHAINS = config.NETWORK_IDS_FOR_DROPDOWN as SupportedChainId[]
 
 export default function NetworksDropdown() {
   const [selectedNetwork, setSelectedNetwork] = useState(getChainInfo(config.ENFORCE_SWAP_ON_CHAINS[0]))
@@ -64,12 +66,9 @@ export default function NetworksDropdown() {
               )}
             >
               {selectedNetwork && <img src={selectedNetwork.logoUrl} alt="Network logo url" width={20} height={20} />}
-              {selectedNetwork && <span className={'ml-1'}>{selectedNetwork.nativeCurrency.name}</span>}
+              {selectedNetwork && <span className={'ml-1'}>{selectedNetwork.label}</span>}
               <ChevronDownIcon
-                className={classNames(
-                  open ? 'text-gray' : 'text-gray-400',
-                  'ml-2 h-5 w-5 group-hover:text-gray'
-                )}
+                className={classNames(open ? 'text-gray' : 'text-gray-400', 'ml-2 h-5 w-5 group-hover:text-gray')}
                 aria-hidden="true"
               />
             </Popover.Button>
@@ -106,7 +105,7 @@ export default function NetworksDropdown() {
                   <span className={'text-sm'}>
                     {unsupportedNetwork ? 'Selected a supported network' : 'Select a network'}
                   </span>
-                  {ALL_SUPPORTED_CHAIN_IDS.map(chainId => {
+                  {NETWORK_SELECTOR_CHAINS.map(chainId => {
                     const chainInfo = getChainInfo(chainId)
                     return (
                       <span
@@ -120,7 +119,7 @@ export default function NetworksDropdown() {
                           await switchNetwork(chainId)
                         }}
                       >
-                        {chainInfo.nativeCurrency.name}
+                        {chainInfo.label}
                       </span>
                     )
                   })}

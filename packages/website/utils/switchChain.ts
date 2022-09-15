@@ -19,6 +19,8 @@ function getRpcUrls(chainId: SupportedChainId): [string] {
     case SupportedChainId.GOERLI:
     case SupportedChainId.LOCAL_POW:
     case SupportedChainId.LOCAL_POS:
+    case SupportedChainId.ETF:
+    case SupportedChainId.ETHW:
       return [RPC_URLS[chainId]]
     default:
   }

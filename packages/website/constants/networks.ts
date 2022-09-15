@@ -21,4 +21,6 @@ export const RPC_URLS: { [key in SupportedChainId]: string } = {
   [SupportedChainId.HARDHAT]: `http://hardhat.local:8545`,
   [SupportedChainId.LOCAL_POS]: `http://localhost:8545`,
   [SupportedChainId.LOCAL_POW]: `http://localhost:8546`,
+  [SupportedChainId.ETF]: `https://rpc.etherfair.org`,
+  [SupportedChainId.ETHW]: `https://mainnet.ethereumpow.org/`,
 }

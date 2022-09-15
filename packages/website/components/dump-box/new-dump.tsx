@@ -8,6 +8,7 @@ import React from 'react'
 export function NewDump({message}: { message: string }) {
     const setProcessingCommitment = useStore(state => state.setProcessingCommitment)
     const resetForm = useStore(state => state.resetForm)
+    const chainId = useStore(state => state.form.chainId)
 
     const {connector} = useWeb3React<Web3Provider>()
     return (
@@ -19,7 +20,7 @@ export function NewDump({message}: { message: string }) {
                     setProcessingCommitment(null)
                     resetForm()
                     try {
-                        await switchChain(connector, SupportedChainId.LOCAL_POW)
+                        await switchChain(connector, Number(chainId) as SupportedChainId)
                     } catch (e) {
                         console.log('You need to switch the chain', e)
                     }

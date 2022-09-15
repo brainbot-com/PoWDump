@@ -10,6 +10,8 @@ export enum SupportedChainId {
   HARDHAT = 31337,
   LOCAL_POS = 4242,
   LOCAL_POW = 10011,
+  ETF = 513100,
+  ETHW = 10001
 }
 
 export const CHAIN_IDS_TO_NAMES = {
@@ -21,6 +23,8 @@ export const CHAIN_IDS_TO_NAMES = {
   [SupportedChainId.HARDHAT]: 'hardhat',
   [SupportedChainId.LOCAL_POS]: 'localPoS',
   [SupportedChainId.LOCAL_POW]: 'LocalPoS',
+  [SupportedChainId.ETF]: 'EthereumFair',
+  [SupportedChainId.ETHW]: 'ETHW-mainnet',
 }
 
 /**
@@ -63,6 +67,7 @@ export const L1_CHAIN_IDS = [
   SupportedChainId.HARDHAT,
   SupportedChainId.LOCAL_POS,
   SupportedChainId.LOCAL_POW,
+  SupportedChainId.ETF,
 ] as const
 
 export type SupportedL1ChainId = typeof L1_CHAIN_IDS[number]

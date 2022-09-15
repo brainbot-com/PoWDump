@@ -15,6 +15,7 @@ type FormType = {
   complete: boolean
   isCommitting: boolean
   txHash: string
+  chainId: string
 }
 
 export type SubgraphCommitment = {
@@ -58,10 +59,10 @@ type Store = {
   updateFormValue: <K extends keyof FormType>(key: K, value: FormType[K]) => void
   resetForm: () => void
   txSecrets: { [txHash: string]: string }
-  setTxSecrets: (txHash: string, secret: string) => void
-  deleteTxSecrets: (txHash: string) => void
+  setTxSecrets: (txHash: string, secret: string, chainId: string) => void
+  deleteTxSecrets: (txHash: string, chainId: string) => void
   swapSecrets: { [swapId: string]: string }
-  setSwapSecrets: (swapId: string, secret: string) => void
+  setSwapSecrets: (swapId: string, secret: string, chainId: string) => void
   deleteSwapSecrets: (swapId: string) => void
   processingCommitment: null | Commitisch
   setProcessingCommitment: (newProcessingCommitment: null | Commitisch) => void
@@ -74,6 +75,7 @@ const defaultForm: FormType = {
   complete: false,
   isCommitting: false,
   txHash: '',
+  chainId: ''
 }
 
 const defaultSwapSettings: SwapSettings = {
@@ -119,38 +121,38 @@ export const useStore = create<Store>()(
         setUserPrice: (newPrice) => set({ userPrice: newPrice }, false, { type: 'setUserPrice' }),
 
         txSecrets: {},
-        setTxSecrets: (txHash, secret) =>
+        setTxSecrets: (txHash, secret, chainId) =>
           set(
             state => ({
               txSecrets: {
                 ...state.txSecrets,
-                [txHash]: secret,
+                [`${chainId}_${txHash}`]: secret,
               },
             }),
             false,
-            { type: 'setTxSecrets', txHash, secret }
+            { type: 'setTxSecrets', txHash, secret, chainId  }
           ),
-        deleteTxSecrets: (txHash) =>
+        deleteTxSecrets: (txHash, chainId) =>
           set(
             state => {
               const stateToUpdate = { ...state.txSecrets }
-              delete stateToUpdate[txHash]
+              delete stateToUpdate[`${chainId}_${txHash}`]
               return { txSecrets: stateToUpdate }
             },
             false,
-            { type: 'deleteTxSecrets', txHash }
+            { type: 'deleteTxSecrets', txHash, chainId }
           ),
         swapSecrets: {},
-        setSwapSecrets: (swapId, secret) =>
+        setSwapSecrets: (swapId, secret, chainId) =>
           set(
             state => ({
               swapSecrets: {
                 ...state.swapSecrets,
-                [swapId]: secret,
+                [`${chainId}_${swapId}`]: secret,
               },
             }),
             false,
-            { type: 'setSwapSecrets', swapId, secret }
+            { type: 'setSwapSecrets', swapId, secret, chainId }
           ),
         deleteSwapSecrets: (swapId) =>
           set(
