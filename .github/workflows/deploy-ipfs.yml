@@ -81,6 +81,12 @@ jobs:
           --record-data dnslink=/ipfs/${{ steps.upload.outputs.cid}}
           --record-ttl 300
 
+      - name: Convert CIDV0
+        id: convert_cidv0
+        uses: uniswap/convert-cidv0-cidv1@v1.0.0
+        with:
+          cidv0: ${{ steps.upload.outputs.cid }}
+
       - name: Release
         uses: actions/create-release@v1.1.0
         env:
@@ -89,5 +95,10 @@ jobs:
           tag_name: ${{ needs.tag.outputs.new_tag }}
           release_name: Release ${{ needs.tag.outputs.new_tag }}
           body: |
+
+            IPFS hashes for this version:
+
+            CIDv0: ${{ steps.upload.outputs.cid }}
+            CIDv1: ${{ steps.convert_cidv0.outputs.cidv1 }}
 
             ${{ needs.tag.outputs.changelog }}
