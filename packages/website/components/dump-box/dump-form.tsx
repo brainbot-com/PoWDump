@@ -290,7 +290,8 @@ export function DumpForm() {
             {isSwapEnabled ?
                 <div className={'flex flex-row justify-end items-center mr-5 text-gray text-sm mb-2'}>
                   Balance: {currencyAmount.toFixed(5)}
-                  {maxAmountFormatted === ethPoWAmount ? null : (
+                  {/*{ hide the button for now - there must be a better way to take .03 from the current user amount}*/}
+                  {BigNumber.from(parseEther(maxAmountFormatted)).lt(parseEther("0.03")) || maxAmountFormatted === ethPoWAmount ? null : (
                       <button
                           disabled={!isSwapEnabled}
                           className={
@@ -356,8 +357,9 @@ export function DumpForm() {
           />{' '}
           <span className={!isSwapEnabled ? 'text-gray' : ''}>
             I understand and accept the{' '}
-            <Link href={'/terms_and_conditions'} target={'_blank'} rel="noreferrer" className={'underline'}>
-              Terms & Conditions
+            {/*{the link doesn't work when in dev mode, but works when the nextjs page is exported}*/}
+            <Link href={'/terms_and_conditions.html'}  passHref>
+              <a className={'underline'} target={'_blank'} rel="noreferrer">Terms & Conditions</a>
             </Link>
           </span>
         </label>
