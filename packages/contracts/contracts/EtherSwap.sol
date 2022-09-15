@@ -16,7 +16,7 @@ import "hardhat/console.sol";
  * contract's overloaded {commit} function with:
  *  - `msg.value` equal to the contract's `fee` + `_payout`
  *  - `_expectedAmount` the expected amount of ether to receive on the target
- *     chain, the duration
+ *     chain
  *  - `_lockTimeSec` the duration the swap offer is valid
  *  - `_secretHash` the hash of the secret that will be revealed to claim the
  *    swap
