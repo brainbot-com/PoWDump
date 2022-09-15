@@ -43,7 +43,10 @@ jobs:
       - uses: ./.github/actions/setup
       - name: Add .env files
         run: echo ${{secrets.ENV_WEBSITE_BASE64}} | base64 -d > ./packages/website/.env
-
+      - name: Install doctl
+        uses: digitalocean/action-doctl@v2
+        with:
+          token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
       - name: Build
         env:
           CI: true
@@ -61,13 +64,22 @@ jobs:
         with:
           limit-access-to-actor: true
 
-      - uses: aquiladev/ipfs-action@v0.2.1
+      - name: Upload to IPFS pinning service
+        uses: aquiladev/ipfs-action@v0.2.1
         id: upload
         with:
           path: ./packages/website/out
           service: pinata
           pinataKey: ${{ secrets.PINATA_KEY }}
           pinataSecret: ${{ secrets.PINATA_SECRET }}
+
+      - name: Update _dnslink record
+        run: >-
+          doctl compute domain records update
+          _dnslink.${{ secrets.APP_DOMAIN }}
+          --record-type TXT
+          --record-data dnslink=/ipfs/${{ steps.upload.outputs.cid}}
+          --record-ttl 300
 
       - name: Release
         uses: actions/create-release@v1.1.0
