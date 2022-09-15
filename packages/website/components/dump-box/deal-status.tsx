@@ -35,7 +35,8 @@ export const DealStatus = () => {
   const ethPoW = processingCommitment?.value as string
   const ethPoS = processingCommitment?.expectedAmount as string
   const expireTime = processingCommitment?.endTimeStamp ? Number(processingCommitment.endTimeStamp) : null
-  const stateSecret = swapId ? swapSecrets[swapId] || null : null
+  const formChainId = useStore(state => state.form.chainId)
+  const stateSecret = swapId ? swapSecrets[`${formChainId}_${swapId}`] || null : null
   const isCommitting = useStore(state => state.form.isCommitting)
   const commitTxHash = useStore(state => state.form.txHash)
   const [swapExpired, setSwapExpired] = useState(false)

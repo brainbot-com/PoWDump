@@ -131,7 +131,7 @@ yargs(hideBin(process.argv))
     }
   )
   .command(
-    "watch <swapContractAddressOnSourceChain> [swapContractAddressOnTargetChain] [commitmentSourceChainRPC] [commitmentTargetChainRPC] [privateKey]",
+    "watch [swapContractAddressOnSourceChain] [swapContractAddressOnTargetChain] [commitmentSourceChainRPC] [commitmentTargetChainRPC] [privateKey]",
     "Watches the source contract for new commitments and matches them on the target chain",
     (args: Argv) => {
       args.option("swapContractAddressOnSourceChain", {

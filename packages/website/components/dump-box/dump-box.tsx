@@ -10,6 +10,9 @@ import { ExclamationTriangleIcon } from '@heroicons/react/24/outline'
 import { useWeb3React } from '@web3-react/core'
 import { Web3Provider } from '@ethersproject/providers'
 import { isSwapSupportedOnChain } from '../../utils/helpers'
+import { ChangeChain } from './change-chain'
+import config from '../../config'
+import { getChainInfo } from '../../constants/chainInfo'
 
 function DumpBox() {
   const processingCommitment = useStore(state => state.processingCommitment)
@@ -42,8 +45,23 @@ function DumpBox() {
             )}
             {!isSwapEnabled && isAccountConnected && (
               <>
-                <div className="text-center flex flex-row items-center bg-red-600 p-5 mt-7 rounded-md text-white">
-                  <ExclamationTriangleIcon className={'w-10 mr-2'} /> The currently selected chain is not supported!
+                <div className="text-center flex flex-col bg-red-600 p-5 mt-7 rounded-md text-white">
+                  <div className={'flex flex-col items-center justify-center'}>
+                    <ExclamationTriangleIcon className={'w-20 mr-2'} />
+                    Dumping is not supported on the current chain.
+                  </div>
+                  <div className="flex flex-wrap flex-col mt-5 bg-yellow text-black p-5 rounded-md">
+                    {config.ENFORCE_SWAP_ON_CHAINS.map(chainId => {
+                      const chainInfo = getChainInfo(chainId)
+                      return (
+                        <div key={chainId} className={'flex flex-row justify-between mt-5 items-center'}>
+                          <div>{chainInfo?.nativeCurrency?.name || chainId}</div>
+
+                          <ChangeChain className={"text-xs"} chainId={chainId} label={"Use chain"}/>
+                        </div>
+                      )
+                    })}
+                  </div>
                 </div>
               </>
             )}

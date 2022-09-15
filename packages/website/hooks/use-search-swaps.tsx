@@ -8,6 +8,7 @@ import config from '../config'
 import { SubgraphCommitment, useStore } from '../store'
 import { compareAsc, fromUnixTime } from 'date-fns'
 import { useInterval } from './use-interval'
+import {useWeb3React} from "@web3-react/core";
 
 const posQuery = gql`
   query getSwap($recipient: String!, $hashedSecret: String!) {

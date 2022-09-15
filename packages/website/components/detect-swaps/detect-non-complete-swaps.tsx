@@ -44,13 +44,14 @@ const getMatchingSwapsQuery = gql`
 
 export const DetectNonCompleteSwaps = () => {
   const { account, provider } = useWeb3React<Web3Provider>()
-  const [nonCompleteSwaps, setNonCompleteSwaps] = useState<SubgraphCommitment[]>([])
+  const [nonCompleteSwaps, setNonCompleteSwaps] = useState<{ chainId: string; swap: SubgraphCommitment }[]>([])
 
   const setProcessingCommitment = useStore(state => state.setProcessingCommitment)
   const txSecrets = useStore(state => state.txSecrets)
   const deleteTxSecrets = useStore(state => state.deleteTxSecrets)
   const swapSecrets = useStore(state => state.swapSecrets)
   const setSwapSecrets = useStore(state => state.setSwapSecrets)
+  const updateFormValue = useStore(state => state.updateFormValue)
 
   useEffect(() => {
     const getSwapIdForHashes = async () => {
@@ -59,22 +60,23 @@ export const DetectNonCompleteSwaps = () => {
       }
       // Go over the transaction keys, then fetch receipts for them, find out the swap id from the logs
       // if the receipt status is 1, then remove the txSecret entry and add the swap id to the swapSecrets
-      for await (const txHash of Object.keys(txSecrets)) {
+      for await (const txHashWithChainId of Object.keys(txSecrets)) {
+        const [chainId, txHash] = txHashWithChainId.split('_')
         const txReceipt = await provider.waitForTransaction(txHash, 1, 1000 * 60)
         if (txReceipt && txReceipt.status === 1) {
           const log = getCommitLog(txReceipt)
 
           if (log.name === 'Commit') {
             if (log.args.id) {
-              setSwapSecrets(log.args.id, txSecrets[txHash])
+              setSwapSecrets(log.args.id, txSecrets[txHashWithChainId], chainId)
             }
           }
 
-          deleteTxSecrets(txHash)
+          deleteTxSecrets(txHash, chainId)
         }
 
         if (txReceipt && txReceipt.status === 0) {
-          deleteTxSecrets(txHash)
+          deleteTxSecrets(txHash, chainId)
         }
       }
     }
@@ -82,52 +84,67 @@ export const DetectNonCompleteSwaps = () => {
     getSwapIdForHashes()
   }, [provider, txSecrets, setSwapSecrets, deleteTxSecrets])
 
-
-
   useEffect(() => {
     if (!account) {
       return
     }
     const getNonCompleteSwaps = async () => {
       const nonComplete = []
-      const data = await request(config.SUBGRAPH_POW_URL, getNonCompleteSwapsQuery, {
-        initiator: String(account),
-        endTimeStamp: Math.floor(Date.now() / 1000),
-      })
 
-      if (data) {
-        const { swapCommitments } = data
+      for await (const chainIdForSubgraph of Object.keys(config.SUBGRAPH_POW_URLS)) {
+        const subgraphUrl = config.SUBGRAPH_POW_URLS[chainIdForSubgraph]
 
-        for await (const swap of swapCommitments) {
-          if (swap.recipient === ZERO_ADDRESS) {
-            nonComplete.push(swap)
-            continue
-          }
+        const data = await request(subgraphUrl, getNonCompleteSwapsQuery, {
+          initiator: String(account),
+          endTimeStamp: Math.floor(Date.now() / 1000),
+        })
 
-          const data = await request(config.SUBGRAPH_POS_URL, getMatchingSwapsQuery, {
-            recipient: String(account),
-            initiator: String(swap.recipient),
-            hashedSecret: String(swap.hashedSecret),
-          })
+        if (data) {
+          const { swapCommitments } = data
 
-          if (data) {
-            const { swapCommitments } = data
-            if (swapCommitments.length === 1) {
-              const swapCommitment = swapCommitments[0]
-
-              if (swapCommitment.emptied === false) {
-                nonComplete.push(swap)
-                continue
-              }
-
-              if (swapCommitment.refunded === false && swapCommitment.emptied === false) {
-                nonComplete.push(swap)
-                continue
-              }
+          for await (const swap of swapCommitments) {
+            if (swap.recipient === ZERO_ADDRESS) {
+              nonComplete.push({
+                chainId: chainIdForSubgraph,
+                swap: swap,
+              })
+              continue
             }
-          } else {
-            nonComplete.push(swap)
-            continue
+
+            const data = await request(config.SUBGRAPH_POS_URL, getMatchingSwapsQuery, {
+              recipient: String(account),
+              initiator: String(swap.recipient),
+              hashedSecret: String(swap.hashedSecret),
+            })
+
+            if (data) {
+              const { swapCommitments } = data
+              if (swapCommitments.length === 1) {
+                const swapCommitment = swapCommitments[0]
+
+                if (swapCommitment.emptied === false) {
+                  nonComplete.push({
+                    chainId: chainIdForSubgraph,
+                    swap: swap,
+                  })
+                  continue
+                }
+
+                if (swapCommitment.refunded === false && swapCommitment.emptied === false) {
+                  nonComplete.push({
+                    chainId: chainIdForSubgraph,
+                    swap: swap,
+                  })
+                  continue
+                }
+              }
+            } else {
+              nonComplete.push({
+                chainId: chainIdForSubgraph,
+                swap: swap,
+              })
+              continue
+            }
           }
         }
       }
@@ -140,12 +157,11 @@ export const DetectNonCompleteSwaps = () => {
     })
   }, [account, setNonCompleteSwaps])
 
-
   if (nonCompleteSwaps.length) {
     return (
       <div className={'border border-1 rounded-md p-5 bg-yellow text-black'}>
-        <div className={"flex flex-row"}>
-          <div className={"mr-2 flex flex-1 items-center"}>
+        <div className={'flex flex-row'}>
+          <div className={'mr-2 flex flex-1 items-center'}>
             <ExclamationTriangleIcon height={20} />
           </div>
 
@@ -153,8 +169,10 @@ export const DetectNonCompleteSwaps = () => {
         </div>
 
         <div>
-          {nonCompleteSwaps.map(swap => {
-            if (!swapSecrets[swap.id]) {
+          {nonCompleteSwaps.map(item => {
+            const { chainId, swap } = item
+
+            if (!swapSecrets[`${chainId}_${swap.id}`]) {
               return null
             }
             return (
@@ -169,6 +187,7 @@ export const DetectNonCompleteSwaps = () => {
                 <div className={'items-center content-center flex-1 flex'}>
                   <button
                     onClick={() => {
+                      updateFormValue('chainId', chainId)
                       setProcessingCommitment(swap)
                     }}
                     className={'bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded text-sm'}

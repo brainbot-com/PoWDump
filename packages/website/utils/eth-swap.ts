@@ -12,7 +12,7 @@ export async function commit(
   },
   signer: JsonRpcSigner
 ) {
-  const ethSwapContract = getPoWSwapContract(signer)
+  const ethSwapContract = await getPoWSwapContract(signer)
 
   const txResponse: TransactionResponse = await ethSwapContract[
     'commit(uint64,uint64,bytes32,uint256,uint256,address)'
@@ -38,7 +38,7 @@ export async function claim(secret: string, signer: JsonRpcSigner) {
 }
 
 export async function refund(swapId:string, signer: JsonRpcSigner) {
-    const ethSwapContract = getPoWSwapContract(signer)
+    const ethSwapContract = await getPoWSwapContract(signer)
     const txResponse: TransactionResponse = await ethSwapContract.refund(swapId)
 
     return txResponse

@@ -3,6 +3,7 @@ import { gql, request } from 'graphql-request'
 import { config, ZERO_ADDRESS } from '../config'
 import { useStore } from '../store'
 import { useInterval } from './use-interval'
+import {useWeb3React} from "@web3-react/core";
 
 const query = gql`
   query getCommitment($id: String!) {
@@ -26,15 +27,16 @@ let lastRecipient = ZERO_ADDRESS
 export const useSearchRecipient = (swapId: string | null, cancelQuery: boolean) => {
   const processingCommitment = useStore(state => state.processingCommitment)
   const setProcessingCommitment = useStore(state => state.setProcessingCommitment)
+  const chainId = useStore(state => state.form.chainId)
   const [delay, setDelay] = useState(defaultDelay)
 
   useInterval(
     async () => {
-      if (!swapId) {
+      if (!swapId || !chainId) {
         return
       }
 
-      const data = await request(config.SUBGRAPH_POW_URL, query, { id: String(swapId) })
+      const data = await request(config.SUBGRAPH_POW_URLS[chainId], query, { id: String(swapId) })
 
       if (data) {
         const { swapCommitment } = data
