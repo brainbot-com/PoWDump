@@ -5,7 +5,6 @@ import abis from '@package/dump-pow-contracts/artifacts/contracts/EtherSwap.sol/
 import config from '../config'
 import {TransactionReceipt} from "@ethersproject/abstract-provider";
 import {ethers} from "ethers";
-import {sign} from "crypto";
 
 export const getPoSSwapContract = (signer: JsonRpcSigner) => {
     return new Contract(config.ETH_POS_CONTRACT_ADDRESS, abis.abi, signer)
@@ -13,7 +12,6 @@ export const getPoSSwapContract = (signer: JsonRpcSigner) => {
 
 export const getPoWSwapContract = async (signer: JsonRpcSigner) => {
     const chainId = await signer.getChainId()
-    console.log(config.ETH_POW_CONTRACT_ADDRESSES[chainId])
     return new Contract(config.ETH_POW_CONTRACT_ADDRESSES[chainId], abis.abi, signer)
 }
 
