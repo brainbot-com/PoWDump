@@ -1,0 +1,90 @@
+version: '3'
+services:
+  graph-node:
+    image: graphprotocol/graph-node
+    restart: always
+    depends_on:
+      - ipfs
+      - postgres
+    environment:
+      postgres_host: postgres
+      postgres_user: graph-node
+      postgres_pass: let-me-in
+      postgres_db: graph-node
+      ipfs: 'ipfs:5001'
+      ethereum: "mainnet:${MAINNET_ETHURL} ethw:${ETHW_ETHURL} etf:${ETF_ETHURL}"
+      GRAPH_LOG: info
+      # can be "index-node", "query-node" or "combined-node"
+      node_role: "${GRAPH_NODE_ROLE}"
+      node_id: "${GRAPH_NODE_ID}"
+    labels:
+      caddy: graph.powdump.com
+      caddy.reverse_proxy: "{{upstreams 8000}}"
+
+  ipfs:
+    image: ipfs/kubo:v0.14.0
+    volumes:
+      - ./data/ipfs:/data/ipfs
+
+  graph-cli:
+    profiles: ["tools"]
+    build:
+      dockerfile: Dockerfile 
+      context: ../..
+    entrypoint:
+      - npx
+      - graph
+    working_dir: /usr/app/checkout/packages/subgraph
+    volumes:
+      - ../../packages/subgraph:/usr/app/checkout/packages/subgraph
+      - ./data/contracts:/usr/app/checkout/packages/contracts/artifacts
+      - ./data/subgraph/build:/usr/app/checkout/packages/subgraph/build
+      - ./data/subgraph/generated:/usr/app/checkout/packages/subgraph/generated
+    environment:
+      GRAPH_URL: "http://graph-node:8020"
+    depends_on:
+      - graph-node
+
+  hardhat:
+    profiles: ["tools"]
+    build:
+      dockerfile: Dockerfile 
+      context: ..
+    working_dir: /usr/app/checkout/packages/contracts
+    entrypoint:
+      - npx
+      - hardhat
+    volumes:
+      - ./data/contracts:/usr/app/checkout/packages/contracts/artifacts
+      - ../../packages/contracts:/usr/app/checkout/packages/contracts
+         
+  postgres:
+    image: postgres
+    restart: always
+    command:
+      [
+        "postgres",
+        "-cshared_preload_libraries=pg_stat_statements"
+      ]
+    environment:
+      POSTGRES_USER: graph-node
+      POSTGRES_PASSWORD: let-me-in
+      POSTGRES_DB: graph-node
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: pg_isready
+
+  caddy:
+    image: lucaslorentz/caddy-docker-proxy:ci-alpine
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./data/caddy:/data
+    environment:
+      CADDY_INGRESS_NETWORKS: powdump_default
+    labels:
+      caddy.email: "devops@brainbot.com"

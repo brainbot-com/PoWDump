@@ -7,7 +7,7 @@ import {Connection, ConnectionType} from '../connection'
 import {getConnection, getConnectionName} from '../connection/utils'
 import {useMemo} from 'react'
 import useEagerlyConnect from "../hooks/useEagerlyConnect";
-
+import {Blocklist} from "../components/blocklist";
 const queryClient = new QueryClient();
 
 const availableConnections = [
@@ -24,7 +24,9 @@ function MyApp({Component, pageProps}: AppProps) {
     return (
         <Web3ReactProvider connectors={connectors} key={key}>
             <QueryClientProvider client={queryClient}>
-                <Component {...pageProps} />
+                <Blocklist>
+                    <Component {...pageProps} />
+                </Blocklist>
             </QueryClientProvider>
         </Web3ReactProvider>
     )

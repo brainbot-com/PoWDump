@@ -23,4 +23,5 @@ lerna-debug.log
 /packages/subgraph/generated
 
 # Deployment files
-/deploy/data/
+/deploy/production/data/
+/deploy/staging/data/
