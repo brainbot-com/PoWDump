@@ -347,7 +347,12 @@ export function DumpForm() {
               updateFormValue('termsAccepted', !termsAccepted)
             }}
           />{' '}
-          <span className={!isSwapEnabled ? 'text-gray' : ''}>I understand and accept the Terms & Conditions</span>
+          <span className={!isSwapEnabled ? 'text-gray' : ''}>
+            I understand and accept the{' '}
+            <a href={'/terms_and_conditions'} target={'_blank'} rel="noreferrer" className={'underline'}>
+              Terms & Conditions
+            </a>
+          </span>
         </label>
       </div>
 
