@@ -59,7 +59,7 @@ jobs:
       - name: Setup tmate session
         uses: mxschmitt/action-tmate@v3
         # only start the session when enable via manual workflow trigger and the previous step failed
-        if: ${{ github.event_name == 'workflow_dispatch' && inputs.debug_enabled  && ${{ failure() }}}}
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.debug_enabled  &&  failure() }}
         timeout-minutes: 15
         with:
           limit-access-to-actor: true
