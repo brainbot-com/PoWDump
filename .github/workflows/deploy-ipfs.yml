@@ -1,20 +1,24 @@
 name: Release and deploy to IPFS
 on:
+  push:
+    branches:
+      - main
   pull_request:
+    branches:
+      - main
     types:
-      - closed
+      - opened
 
   workflow_dispatch:
     inputs:
       debug_enabled:
         type: boolean
-        description: 'Run the build with tmate debugging enabled (https://github.com/marketplace/actions/debugging-with-tmate)'     
+        description: 'Run the build with tmate debugging enabled'     
         required: false
         default: false
 
 jobs:
   tag:
-    if: ${{ github.event.pull_request.merged == true || github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-latest
     outputs:
       new_tag: ${{ steps.github-tag-action.outputs.new_tag }}
@@ -28,13 +32,15 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           # new_tag is only set when there are new semver commits
           # on the release branch
-          release_branches: release
-          # bumps have to be set explicitly
-          # default_bump: false
+          release_branches: main
+          default_bump: false
+          custom_release_rules: 'hotfix:patch:Hot Fixes,bug:patch:Bug Fixes,chore:patch:Chores'
 
-  release:
+  deploy-release:
+    environment: 
+      name: production
+      url: https://${{ secrets.APP_SUBDOMAIN}}.${{ secrets.APP_DOMAIN }}
     needs: tag
-    environment: production
     # only release when there is a new tag
     if: ${{ needs.tag.outputs.new_tag != null }}
     runs-on: ubuntu-latest
@@ -64,20 +70,21 @@ jobs:
         with:
           limit-access-to-actor: true
 
-      - name: Upload to IPFS pinning service
+      - name: Upload to IPFS pinning service (pinata.cloud)
         uses: aquiladev/ipfs-action@v0.2.1
         id: upload
         with:
           path: ./packages/website/out
           service: pinata
+          pinName: powdump-release-${{ needs.tag.outputs.new_tag }}
           pinataKey: ${{ secrets.PINATA_KEY }}
           pinataSecret: ${{ secrets.PINATA_SECRET }}
 
       - name: Update _dnslink record
         run: >-
-          doctl compute domain records update
-          _dnslink.${{ secrets.APP_DOMAIN }}
+          doctl compute domain records update ${{ secrets.APP_DOMAIN }}
           --record-type TXT
+          --record-id ${{ secrets.DO_RECORD_ID_DNSLINK }}
           --record-data dnslink=/ipfs/${{ steps.upload.outputs.cid}}
           --record-ttl 300
 
@@ -96,9 +103,8 @@ jobs:
           release_name: Release ${{ needs.tag.outputs.new_tag }}
           body: |
 
-            The latest release will be available at https://${{ secrets.APP_DOMAIN }}
-
-            A specific app version can be directly accessed with your IPFS node or an IPFS gateway.
+            The latest release will be available at https://${{secrets.APP_SUBDOMAIN}}.${{ secrets.APP_DOMAIN }}
+            Still, a specific app version can be directly accessed with your IPFS node or an IPFS gateway.
 
             IPFS hashes for this version:
 
@@ -106,12 +112,11 @@ jobs:
             CIDv1: ${{ steps.convert_cidv0.outputs.cidv1 }}
 
 
-            Warning:
-            The app uses the localStorage to remember security critical information like swap secrets.
-            Therefore you should always use an IPFS gateway with origin separation,
-            otherwise other apps served over that gateway could access your secrets.
+            *If you use custom IPFS gateways, you should note the following:
 
-            The app is not interoperable across different domains!
+            **Warning**:
+              - The app only works securely when accessed via a IPFS gateway with [subdomain access](https://docs.ipfs.tech/concepts/ipfs-gateway/#subdomain).
+              - The app is not interoperable across different domains!*
 
 
             ${{ needs.tag.outputs.changelog }}
