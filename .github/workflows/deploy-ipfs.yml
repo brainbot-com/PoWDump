@@ -1,13 +1,10 @@
 name: Release and deploy to IPFS
 on:
-  push:
-    branches:
-      - main
   pull_request:
     branches:
       - main
     types:
-      - opened
+      - closed
 
   workflow_dispatch:
     inputs:
@@ -20,8 +17,10 @@ on:
 jobs:
   tag:
     runs-on: ubuntu-latest
+    if: ${{ github.event.pull_request.merged == true || github.event_name == 'workflow_dispatch' }}
     outputs:
-      new_tag: ${{ steps.github-tag-action.outputs.new_tag }}
+      tag: ${{ steps.github-tag-action.outputs.new_tag }}
+      release_type: ${{ steps.github-tag-action.outputs.release_type }}
       changelog: ${{ steps.github-tag-action.outputs.changelog }}
     steps:
       - uses: actions/checkout@v3
@@ -41,7 +40,7 @@ jobs:
       name: production
     needs: tag
     # only release when there is a new tag
-    if: ${{ needs.tag.outputs.new_tag != null }}
+    if: ${{ needs.tag.outputs.tag != null }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -75,7 +74,7 @@ jobs:
         with:
           path: ./packages/website/out
           service: pinata
-          pinName: powdump-release-${{ needs.tag.outputs.new_tag }}
+          pinName: powdump-release-${{ needs.tag.outputs.tag }}
           pinataKey: ${{ secrets.PINATA_KEY }}
           pinataSecret: ${{ secrets.PINATA_SECRET }}
 
@@ -98,8 +97,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ needs.tag.outputs.new_tag }}
-          release_name: Release ${{ needs.tag.outputs.new_tag }}
+          tag_name: ${{ needs.tag.outputs.tag }}
+          release_name: Release ${{ needs.tag.outputs.tag }}
           body: |
 
             The latest release will be available at https://${{secrets.APP_SUBDOMAIN}}.${{ secrets.APP_DOMAIN }}
@@ -107,15 +106,15 @@ jobs:
 
             IPFS hashes for this version:
 
-            CIDv0: ${{ steps.upload.outputs.cid }}
-            CIDv1: ${{ steps.convert_cidv0.outputs.cidv1 }}
+              - CIDv0: `${{ steps.upload.outputs.cid }}`
+              - CIDv1: `${{ steps.convert_cidv0.outputs.cidv1 }}`
 
 
-            *If you use custom IPFS gateways, you should note the following:
+            *If you use custom IPFS gateways, you should note the following:*
 
             **Warning**:
               - The app only works securely when accessed via a IPFS gateway with [subdomain access](https://docs.ipfs.tech/concepts/ipfs-gateway/#subdomain).
-              - The app is not interoperable across different domains!*
+              - The app is not interoperable across different domains!
 
 
             ${{ needs.tag.outputs.changelog }}
