@@ -165,7 +165,7 @@ export const DetectNonCompleteSwaps = () => {
             <ExclamationTriangleIcon height={20} />
           </div>
 
-          <span className={'font-bold'}>It seems that you have some non-complete swaps.</span>
+          <span className={'font-bold'}>It seems that you have some incomplete swaps.</span>
         </div>
 
         <div>
@@ -179,9 +179,9 @@ export const DetectNonCompleteSwaps = () => {
               <div key={'swap-id-' + swap.id} className={'flex flex-row mt-5'}>
                 <div>
                   <div>Swap id: {swap.id} </div>
-                  <div>locked: {formatEther(swap.value)} PoW ETH</div>
-                  <div>expected: {formatEther(swap.expectedAmount)} Eth</div>
-                  <div>expires at: {new Date(Number(swap.endTimeStamp) * 1000).toISOString()}</div>
+                  <div>Locked: {formatEther(swap.value)} PoW ETH</div>
+                  <div>Expected: {formatEther(swap.expectedAmount)} Eth</div>
+                  <div>Expires at: {new Date(Number(swap.endTimeStamp) * 1000).toISOString()}</div>
                 </div>
 
                 <div className={'items-center content-center flex-1 flex'}>
