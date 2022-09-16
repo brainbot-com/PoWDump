@@ -48,9 +48,15 @@ export default function Layout({title, children}: Props) {
                                     <HowItWorks/>
                                 </div>
                             </div>
-                            <div className={"text-center text-gray-500 text-xs p-5 mx-auto"}>
-                                Powdump provides access to powchains and smart contracts deployed by third parties and
-                                is meant to be an information aggregation application.
+                            <div className={"text-gray-500 text-xs p-5 mx-auto"}>
+                                <h5 className={"text-sm"}>Legal</h5>
+                                <p className={"mt-2"}>
+                                    Powdump provides access to powchains and smart contracts deployed by third parties and
+                                    is meant to be an information aggregation application.
+                                </p>
+                                <p className={"mt-2"}>
+                                    <a className={"underline"} href={"https://dump.today/imprint"}>Imprint</a>
+                                </p>
                             </div>
                         </div>
                     </div>
