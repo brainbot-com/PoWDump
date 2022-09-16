@@ -39,7 +39,6 @@ jobs:
   deploy-release:
     environment: 
       name: production
-      url: https://${{ secrets.APP_SUBDOMAIN}}.${{ secrets.APP_DOMAIN }}
     needs: tag
     # only release when there is a new tag
     if: ${{ needs.tag.outputs.new_tag != null }}
