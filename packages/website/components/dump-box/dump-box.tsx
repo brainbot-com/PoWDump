@@ -30,8 +30,8 @@ function DumpBox() {
         message={
           <>
             <p className={'text-center mt-10 font-medium'}>
-              This DApp allows you to dump your Pow Eth that you have on the Proof-of-Work Ethereum chain (aka the fork)
-              for ETH on the canonical Proof-of-Stake Ethereum chain.
+              This DApp allows you to dump your PoW ETH that you have on the Proof-of-Work Ethereum chain (aka the fork)
+              for ETH on the canonical Ethereum chain.
             </p>
             {!isAccountConnected && (
               <div
