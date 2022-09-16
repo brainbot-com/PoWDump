@@ -30,7 +30,7 @@ jobs:
           # on the release branch
           release_branches: release
           # bumps have to be set explicitly
-          default_bump: false
+          # default_bump: false
 
   release:
     needs: tag

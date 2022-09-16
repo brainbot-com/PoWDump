@@ -7,8 +7,8 @@ const Home: NextPage = () => {
     return (
         <div className={"background-image"}>
             <Head>
-                <title>Terms & Conditions</title>
-                <meta name="description" content="Dump that tokens!"/>
+                <title>PoWDump - Terms & Conditions</title>
+                <meta name="description" content="PoWDump is a simple DApp that lets PoW ETH sellers create atomic cross-chain swaps."/>
                 <link rel="icon" href="/favicon.ico"/>
             </Head>
             <NavBar titleClickable={true}/>

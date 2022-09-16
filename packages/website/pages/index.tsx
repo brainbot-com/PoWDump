@@ -11,7 +11,7 @@ const DumpBox = dynamic<{}>(() => import('../components/dump-box').then(mod => m
 const Home: NextPage = () => {
 
     return (
-        <Layout title={'PoWDump'}>
+        <Layout title={'PoWDump - A PoW ETH dump DApp using cross-chain atomic swaps.'}>
             <>
                 <div className={"container mx-auto"}>
                     <div className={"max-w-md mx-auto"}>
