@@ -14,7 +14,7 @@ import { getErrorMessage } from '../../utils/error'
 
 const query = gql`
   query getCommitment($initiator: String!) {
-    swapCommitments(initiator: $initiator, orderBy: endTimeStamp, orderDirection: desc) {
+    swapCommitments(where: {initiator: $initiator}, orderBy: "endTimeStamp", orderDirection: "desc") {
       endTimeStamp
       expectedAmount
       hashedSecret
@@ -131,7 +131,7 @@ export const TransactionHistory = () => {
               {isSubmitting[swap.id] || (refundHashes[swap.id] && !success[swap.id]) ? (
                 <Loader />
               ) : (
-                !isRefunded &&
+                !swap.emptied && !isRefunded &&
                 !refundedSwaps[swap.id] && (
                   <Button
                     buttonType={'primary'}
