@@ -168,8 +168,15 @@ const match = async (swapCommitment: SwapCommitment) => {
     console.log(`> Trying to add recipient to commitment ${id}`);
     const changeRecipientResponse = await sourceContract.changeRecipient(
       id,
-      sourceWallet.address
+      sourceWallet.address,
+        {
+          gasLimit: 150000,
+          maxFeePerGas: ethers.utils.parseUnits("1.5", "gwei"),
+          maxPriorityFeePerGas: ethers.utils.parseUnits("1.5", "gwei"),
+        }
     );
+
+    console.log(`> Waiting for changeRecipient tx to be mined`, changeRecipientResponse.hash);
 
     const addRecipient = await changeRecipientResponse.wait();
 

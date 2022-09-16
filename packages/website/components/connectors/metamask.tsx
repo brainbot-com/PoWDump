@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import React, { useState } from 'react'
 import { useWeb3React } from '@web3-react/core'
 import { formatAddress } from '../../utils/helpers'
 import { Button } from '../button'
@@ -10,6 +10,7 @@ import { ConnectorButton } from './connector-button'
 import { getConnection } from '../../connection/utils'
 import { getErrorMessage } from '../../utils/error'
 import { useStore } from '../../store'
+import { Account } from './account'
 
 const ConnectMetamask = () => {
   const { connector, account } = useWeb3React()
@@ -17,6 +18,7 @@ const ConnectMetamask = () => {
   const setNotification = useStore(state => state.setNotification)
   const connection = getConnection(connector)
   const { useIsActive } = connection.hooks
+  const [open, setOpen] = useState(false)
 
   const active = useIsActive()
 
@@ -56,11 +58,27 @@ const ConnectMetamask = () => {
 
   return (
     <div>
+      {active && account && (
+        <Account
+          show={open}
+          onClose={setOpen}
+          onClick={() => setOpen(false)}
+          value={account}
+          formattedBalance={formattedBalance}
+          onClick1={() => onClickDisconnect()}
+        />
+      )}
+
       {active && account ? (
         <div className={'flex items-center rounded-lg bg-gray-500 text-white p-1'}>
           <div className={'px-2'}>{`${formattedBalance} ETH`}</div>
 
-          <Button className={'bg-rich-black font-bold text-white p-1 px-3 rounded-lg'} onClick={onClickDisconnect}>
+          <Button
+            className={'bg-rich-black font-bold text-white p-1 px-3 rounded-lg'}
+            onClick={() => {
+              setOpen(true)
+            }}
+          >
             {formatAddress(account, 4)}
           </Button>
         </div>
