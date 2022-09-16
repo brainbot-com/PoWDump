@@ -29,7 +29,7 @@ const Home: NextPage = () => {
                     (hereinafter referred to as “App”) interfacing with the smart contracts deployed by a third party on
                     Ethereum Mainnet (chainID 1) and Ethereum POW (chainID 10001) at addresses
                     0xdC8C99452DfCC0eD0574cfaA52f5CB90c8F8131C and 0xdC7650c7562E53115eDB02cCC7bf67FB9F79cfF4.
-                    BBT and the user are collectively referred to as the "parties".</p>
+                    BBT and the user are collectively referred to as the “parties“.</p>
                 <p className={"mt-5"}><span className={"font-bold"}>1.2.</span><br/>
                     There are no verbal side agreements between the parties. These terms and conditions apply
                     exclusively.</p>
