@@ -24,7 +24,7 @@ export const HowItWorks = () => {
             }
         },
         {
-            message: 'Sign a transaction for the dump on the PoW Ethereum chain.', isAtStep: () => {
+            message: 'Sign a transaction for the dump on the PoW chain.', isAtStep: () => {
                 return form.ethPoWAmount && !form.signed && !form.complete && isChainSupported
             }
         },
@@ -39,12 +39,12 @@ export const HowItWorks = () => {
             },
             childrenSteps: [
                 {
-                    message: '> Dump matched on PoS? You need to confirm on the PoS chain fast.', isAtStep: () => {
+                    message: '> Dump matched on PoS? You need to confirm quickly on the PoS chain.', isAtStep: () => {
                         return processingCommitment && processingCommitment.recipient !== ZERO_ADDRESS && !form.complete
                     }
                 },
                 {
-                    message: '> If your transaction expires, you can reclaim your PoW ETH from the contract & retry.', isAtStep: () => {
+                    message: '> If your transaction expires, you can reclaim your PoW ETH from the contract and retry.', isAtStep: () => {
                         return false
                     }
                 }

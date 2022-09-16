@@ -125,14 +125,14 @@ export function Settings() {
                     <span className={'text-sm'}>Coingecko price: {priceFromAPI} </span>
                     <br />
                     <div className={'text-sm flex flex-row'}>
-                      suggested price: {suggestedPrice}
+                      Suggested price: {suggestedPrice}
                       <SuggestedPriceTooltipHelp price={String(priceFromAPI)} strategy={'fixed'}>
                         <QuestionMarkCircleIcon className={'w-4 h-4 text-zinc-400'} />
                       </SuggestedPriceTooltipHelp>
                       <div className={'ml-1'}></div>
                     </div>
                     <label htmlFor={'custom-price'} className={'text-zinc-400'}>
-                      custom price:
+                      Custom price:
                     </label>
                     <div>
                       <CustomDecimalInput
