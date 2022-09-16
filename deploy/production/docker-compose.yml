@@ -19,8 +19,12 @@ services:
       node_id: "${GRAPH_NODE_ID}"
     labels:
       caddy: graph.powdump.com
-      caddy.reverse_proxy: "{{upstreams 8000}}"
-
+      caddy.@blocked: not remote_ip ${METRICS_SERVER_IP}
+      caddy.0_handle: /*
+      caddy.0_handle.0_reverse_proxy: "{{upstreams 8000}}"
+      caddy.1_handle: /metrics
+      caddy.1_handle.respond: "@blocked Denied 403"
+      caddy.1_handle.1_reverse_proxy: "{{upstreams 8040}}"
   ipfs:
     image: ipfs/kubo:v0.14.0
     volumes:
