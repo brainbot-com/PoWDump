@@ -24,7 +24,8 @@ import { SwapMetaRow } from './swap-meta-row'
 import { ChangeChain } from './change-chain'
 import { NewDump } from './new-dump'
 import { ExpiredSwap } from './expired-swap'
-import type {TransactionReceipt} from "@ethersproject/abstract-provider";
+import type { TransactionReceipt } from '@ethersproject/abstract-provider'
+import { Loader } from './loader'
 
 export const DealStatus = () => {
   const { account, provider, chainId } = useWeb3React<Web3Provider>()
@@ -68,13 +69,7 @@ export const DealStatus = () => {
         setSwapExpired(true)
       }
     },
-    revealComplete || swapExpired ? null : 5000
-  )
-
-  const Loader = (
-    <div className={'flex flex-row justify-center'}>
-      <img src={LoaderSvg} alt="Loader icon" className={'w-12 flex'} />
-    </div>
+    revealComplete || swapExpired ? null : 5000,
   )
 
   if (isCommitting && commitTxHash === '') {
@@ -92,7 +87,7 @@ export const DealStatus = () => {
       <DumpBoxLayout style={'in-progress'}>
         <Deal ethPoS={ethPoS} ethPoW={ethPoW} />
         <Status status={'Waiting for transaction to be mined'} />
-        {Loader}
+        <Loader />
 
         <SwapMetaRow txHash={commitTxHash} swapId={swapId} />
       </DumpBoxLayout>
@@ -121,8 +116,9 @@ export const DealStatus = () => {
             <Status status={'Swap is complete!'} />
             <div className={'flex flex-row content-center items-center'}>
               <div className={'mx-auto relative'}>
-                <div className={'bg-white absolute w-10 h-10 z-0 left-5 top-5 z-0'} style={{ zIndex: -1 }}></div>
-                <CheckCircleIcon className="z-10 text-green w-20 h-20 m-0 " aria-hidden="true" />
+                <div className={'bg-white absolute w-10 h-10 z-0 left-5 top-5 z-0'}
+                     style={{ zIndex: -1 }}></div>
+                <CheckCircleIcon className='z-10 text-green w-20 h-20 m-0 ' aria-hidden='true' />
               </div>
             </div>
             <div>
@@ -156,7 +152,7 @@ export const DealStatus = () => {
         {!revealComplete && <Deal ethPoS={ethPoS} ethPoW={ethPoW} />}
 
         <div className={'flex justify-center flex-col items-center'}>
-          {targetSwaps.length === 0 && Loader}
+          {targetSwaps.length === 0 && <Loader />}
 
           <div>
             <div className={'flex justify-center my-5 text-xl'}>
@@ -177,7 +173,8 @@ export const DealStatus = () => {
             {!targetSwaps.length && (
               <div className={'bg-yellow text-black rounded-md p-2 flex flex-row'}>
                 <ExclamationTriangleIcon className={'w-10 mx-3'} />
-                If no-one matches your dump in the the time above, the swap will be cancelled and you can claim your
+                If no-one matches your dump in the the time above, the swap will be cancelled and you
+                can claim your
                 funds back from the contract.
               </div>
             )}
@@ -195,7 +192,9 @@ export const DealStatus = () => {
 
             {!isOnPoSChain && (
               <div className={'mt-5 flex flex-col items-center'}>
-                <div className={'text-sm font-bold mb-5'}>Please switch to the Ethereum chain to complete the swap.</div>
+                <div className={'text-sm font-bold mb-5'}>Please switch to the Ethereum chain to
+                  complete the swap.
+                </div>
                 <ChangeChain chainId={config.POS_CHAIN_ID} />
               </div>
             )}
@@ -212,12 +211,15 @@ export const DealStatus = () => {
                     >
                       <div>
                         {isRevealing && revealTxHash === '' && (
-                          <div className={'flex flex-row bg-gray-500 rounded-md text-white px-4 py-1'}>
-                            <ExclamationTriangleIcon className={'w-4'} /> Waiting for transaction to be signed in the wallet
+                          <div
+                            className={'flex flex-row bg-gray-500 rounded-md text-white px-4 py-1'}>
+                            <ExclamationTriangleIcon className={'w-4'} /> Waiting for
+                            transaction to be signed in the wallet
                           </div>
                         )}
                         {isRevealing && revealTxHash !== '' && (
-                          <div className={'flex flex-row bg-gray-500 rounded-md text-white px-4 py-1'}>
+                          <div
+                            className={'flex flex-row bg-gray-500 rounded-md text-white px-4 py-1'}>
                             Waiting for transaction to be mined
                           </div>
                         )}
@@ -254,7 +256,7 @@ export const DealStatus = () => {
                         </div>
 
                         {isRevealing || revealTxHash ? (
-                          Loader
+                          <Loader />
                         ) : (
                           <Button
                             className={`bg-green rounded-md px-2 py-1 ${!swapDisabled ? '' : 'bg-gray'}`}
