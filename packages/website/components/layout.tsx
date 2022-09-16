@@ -18,8 +18,8 @@ export default function Layout({title, children}: Props) {
         <div className={"background-image"}>
             <Head>
                 <title>{title}</title>
-                <meta name="description" content="Dump that tokens!"/>
-                <link rel="icon" href="/favicon.ico"/>
+                <meta name="description" content="PoWDump is a simple DApp that lets PoW ETH sellers create atomic cross-chain swaps."/>
+                <link rel="icon" href="/favicon.png"/>
             </Head>
             <NavBar/>
             <div className={"relative pb-10"}>
