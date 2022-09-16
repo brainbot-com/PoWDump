@@ -40,14 +40,13 @@ export const ExpiredSwap = ({ swapId, commitTxHash }: Props) => {
         <div className={'bg-yellow text-black rounded-md p-2 flex flex-col'}>
           <div className={'flex'}>
             <ExclamationTriangleIcon className={'w-25 mx-3'} />
-            Unfortunately no-one matched your trade offer. You can claim back your funds from the contract and make a
-            new trade offer afterwards.
+            Unfortunately, no one matched your trade offer. You can claim back your funds from the contract and then make a new trade offer.
           </div>
 
           {chainId === config.POS_CHAIN_ID ? (
             <div className={'mt-5 flex flex-col items-center'}>
               <div className={'text-sm font-bold'}>
-                Please switch to the Proof-of-Work chain you started the swap on in order to to start the refund.
+                Please switch to the Proof-of-Work chain you started the swap on in order to start the refund.
               </div>
             </div>
           ) : (

@@ -337,8 +337,8 @@ export function DumpForm() {
           the specified PoW ETH amount.
         </p>
         <p className={'pt-2 text-sm text-gray'}>
-          If once the transaction is mined, no one matches it on Ethereum Mainnet (PoS) after{' '}
-          {Math.floor(claimPeriodInSec / 60)} minutes you can withdraw the locked PoW ETH**.
+          Once the transaction is mined, if no one matches it on Ethereum Mainnet (PoS) after{' '}
+          {Math.floor(claimPeriodInSec / 60)} minutes you can withdraw the locked PoW ETH.
         </p>
 
         <label className={'text-sm pt-2'}>

@@ -131,7 +131,7 @@ export const DealStatus = () => {
                 {formatAddress(revealTxHash)}
                 <CopyToClipboard text={revealTxHash} />
               </span>{' '}
-              was mined successfully. You received {formatEther(amountReceived)} ETH.
+              was confirmed successfully. You received {formatEther(amountReceived)} ETH.
             </div>
           </>
         )
@@ -160,7 +160,7 @@ export const DealStatus = () => {
 
           <div>
             <div className={'flex justify-center my-5 text-xl'}>
-              <span className={'font-bold'}> Deal expires in:{' ~'}</span>
+              <span className={'font-bold'}> Swap expires in:{' ~'}</span>
 
               {expireTime && (
                 <Countdown
@@ -177,7 +177,7 @@ export const DealStatus = () => {
             {!targetSwaps.length && (
               <div className={'bg-yellow text-black rounded-md p-2 flex flex-row'}>
                 <ExclamationTriangleIcon className={'w-10 mx-3'} />
-                If no-one matches the trade in the the above time, the deal will be cancelled and you can claim your
+                If no-one matches your dump in the the time above, the swap will be cancelled and you can claim your
                 funds back from the contract.
               </div>
             )}
@@ -190,12 +190,12 @@ export const DealStatus = () => {
           <div className={'flex flex-col justify-center items-center bg-yellow rounded-md p-5'}>
             <div className={'text-xl font-bold flex items-center'}>
               <ExclamationTriangleIcon className={'w-5 mr-2'} />
-              Found a matching deal
+              Found a match for your swap
             </div>
 
             {!isOnPoSChain && (
               <div className={'mt-5 flex flex-col items-center'}>
-                <div className={'text-sm font-bold mb-5'}>Please switch to the PoS chain to complete the swap.</div>
+                <div className={'text-sm font-bold mb-5'}>Please switch to the Ethereum chain to complete the swap.</div>
                 <ChangeChain chainId={config.POS_CHAIN_ID} />
               </div>
             )}
@@ -213,18 +213,18 @@ export const DealStatus = () => {
                       <div>
                         {isRevealing && revealTxHash === '' && (
                           <div className={'flex flex-row bg-gray-500 rounded-md text-white px-4 py-1'}>
-                            <ExclamationTriangleIcon className={'w-4'} /> Waiting to sign tx in wallet
+                            <ExclamationTriangleIcon className={'w-4'} /> Waiting for transaction to be signed in the wallet
                           </div>
                         )}
                         {isRevealing && revealTxHash !== '' && (
                           <div className={'flex flex-row bg-gray-500 rounded-md text-white px-4 py-1'}>
-                            Waiting for tx to be mined
+                            Waiting for transaction to be mined
                           </div>
                         )}
                       </div>
                       <div className={'flex flex-row justify-between w-full items-center'}>
                         <div>
-                          <div>Swap number on Pos chain: {swap.id}</div>
+                          <div>Swap number on Ethereum: {swap.id}</div>
                           <div>ETH amount locked in swap: {formatEther(swap.value)}</div>
                           {!swapDisabled && (
                             <div>
