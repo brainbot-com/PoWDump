@@ -112,7 +112,7 @@ export const TransactionHistory = () => {
                 {formatEther(swap.value)}
               </div>
               <div>
-                <span className={'font-bold'}>Has ended:</span> {hasExpired ? 'Yes' : 'No'}
+                <span className={'font-bold'}>Has ended:</span> {hasExpired || swap.emptied ? 'Yes' : 'No'}
               </div>
               {hasExpired && (
                 <div>
