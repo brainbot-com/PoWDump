@@ -9,7 +9,7 @@ import { getErrorMessage } from '../../utils/error'
 import { hexlify } from '@ethersproject/bytes'
 import { randomBytes } from '@ethersproject/random'
 import { keccak256 } from '@ethersproject/keccak256'
-import { ZERO_ADDRESS } from '../../config'
+import { config, ZERO_ADDRESS } from '../../config'
 import { commit } from '../../utils/eth-swap'
 import { CustomDecimalInput } from '../input-row'
 import { CurrencyBadge } from './currency-badge'
@@ -25,8 +25,9 @@ import { CurrencyAmount } from '@uniswap/sdk-core'
 import { ExtendedEther } from '../../utils/ether'
 import { maxAmountSpend } from '../../utils/maxAmountSpend'
 import { SupportedChainId } from '../../constants/chains'
-import {getChainInfo} from "../../constants/chainInfo";
+import { getChainInfo } from '../../constants/chainInfo'
 import Link from 'next/link'
+import { ExclamationTriangleIcon } from '@heroicons/react/24/outline'
 
 const PriceRow = dynamic(() => import('./price-row'), {
   ssr: false,
@@ -118,11 +119,13 @@ export function DumpForm() {
   const transactionExpiryTime: number =
     useStore(state => state.swapSettings.transactionDeadlineInSec) || defaultTransactionDeadlineInSec
   const form = useStore(state => state.form)
+  const [warning, setWarning] = useState('')
   const [ethPoSAmount, setPoSAmount] = useState('0.0')
   const [ethPoWAmount, setPoWAmount] = useState(form.ethPoWAmount)
   const [termsAccepted, setTermsAccepted] = useState(form.termsAccepted)
   const suggestedPrice = useStore(state => state.suggestedPrice)
   const userPrice = useStore(state => state.userPrice)
+  const etherPriceInUsd = useStore(state => state.ethPriceFromAPI)
   const setForm = useStore(state => state.setForm)
   const updateFormValue = useStore(state => state.updateFormValue)
   const setProcessingCommitment = useStore(state => state.setProcessingCommitment)
@@ -135,6 +138,27 @@ export function DumpForm() {
   const chainInfo = getChainInfo(chainId)
 
   const [error, setError] = useState('')
+
+  useEffect(() => {
+    if (ethPoSAmount && Number(ethPoSAmount) > 0 && etherPriceInUsd > 0) {
+      const userReceivesDollars = Number(ethPoSAmount) * etherPriceInUsd
+      if (
+        config.WARN_LIQUIDITY_MIN_AMOUNT_MATCH_IN_DOLLARS &&
+        userReceivesDollars <= config.WARN_LIQUIDITY_MIN_AMOUNT_MATCH_IN_DOLLARS
+      ) {
+        setWarning('MIN_AMOUNT')
+      } else if (
+        config.WARN_LIQUIDITY_MAX_AMOUNT_MATCH_IN_DOLLARS &&
+        userReceivesDollars >= config.WARN_LIQUIDITY_MAX_AMOUNT_MATCH_IN_DOLLARS
+      ) {
+        setWarning('MAX_AMOUNT')
+      } else {
+        setWarning('')
+      }
+    } else {
+      setWarning('')
+    }
+  }, [ethPoSAmount, etherPriceInUsd])
 
   const isSwapEnabled = account && chainId && isSwapSupportedOnChain(chainId)
   useEffect(() => {
@@ -282,33 +306,35 @@ export function DumpForm() {
                 />
               </div>
               <div className={'mr-5 bg-brown-orange pl-2'}>
-
-                {isSwapEnabled && chainInfo ? <CurrencyBadge icon={PowDumpSmallLogo} name={chainInfo?.nativeCurrency?.symbol} /> : null}
+                {isSwapEnabled && chainInfo ? (
+                  <CurrencyBadge icon={PowDumpSmallLogo} name={chainInfo?.nativeCurrency?.symbol} />
+                ) : null}
               </div>
             </div>
 
-            {isSwapEnabled ?
-                <div className={'flex flex-row justify-end items-center mr-5 text-gray text-sm mb-2'}>
-                  Balance: {currencyAmount.toFixed(5)}
-                  {/*{ hide the button for now - there must be a better way to take .03 from the current user amount}*/}
-                  {BigNumber.from(parseEther(maxAmountFormatted)).lt(parseEther("0.03")) || maxAmountFormatted === ethPoWAmount ? null : (
-                      <button
-                          disabled={!isSwapEnabled}
-                          className={
-                            'bg-gray-500 border border-0 border-transparent rounded-sm px-2 text-gray hover:cursor-pointer hover:text-white hover:border-white hover:bg-rich-black-lighter ml-1'
-                          }
-                          onClick={() => {
-                            setPoWAmount(maxAmountFormatted)
-                            updateFormValue('ethPoWAmount', maxAmountFormatted)
-                          }}
-                      >
-                        Max
-                      </button>
-                  )}
-                </div>
-                :
-                <div>&nbsp;</div>
-            }
+            {isSwapEnabled ? (
+              <div className={'flex flex-row justify-end items-center mr-5 text-gray text-sm mb-2'}>
+                Balance: {currencyAmount.toFixed(5)}
+                {/*{ hide the button for now - there must be a better way to take .03 from the current user amount}*/}
+                {BigNumber.from(parseEther(maxAmountFormatted)).lt(parseEther('0.03')) ||
+                maxAmountFormatted === ethPoWAmount ? null : (
+                  <button
+                    disabled={!isSwapEnabled}
+                    className={
+                      'bg-gray-500 border border-0 border-transparent rounded-sm px-2 text-gray hover:cursor-pointer hover:text-white hover:border-white hover:bg-rich-black-lighter ml-1'
+                    }
+                    onClick={() => {
+                      setPoWAmount(maxAmountFormatted)
+                      updateFormValue('ethPoWAmount', maxAmountFormatted)
+                    }}
+                  >
+                    Max
+                  </button>
+                )}
+              </div>
+            ) : (
+              <div>&nbsp;</div>
+            )}
           </div>
         </div>
       </div>
@@ -322,14 +348,42 @@ export function DumpForm() {
 
               <div className={'flex flex-row justify-between'}>
                 <div>You get</div>
-                <div className={'flex flex-row'}>
-                  <CurrencyBadge icon={EthereumLogo} name={`${commify(Number(ethPoSAmount).toFixed(5))} ETH`} />
+                <div className={'flex flex-col'}>
+                  <CurrencyBadge icon={EthereumLogo} name={`${commify(ethPoSAmount)} ETH`} />
                 </div>
               </div>
             </div>
           </div>
         </div>
       </div>
+
+      {warning && (
+        <div>
+          {warning === 'MIN_AMOUNT' && (
+            <div className={'bg-orange p-5 rounded-md flex flex-col justify-center items-center'}>
+              <div>
+                <ExclamationTriangleIcon className={'w-20'} />
+              </div>
+              <div className={'text-center'}>
+                Swaps under {config.WARN_LIQUIDITY_MIN_AMOUNT_MATCH_IN_DOLLARS} USD are not likely to be matched
+                currently. This is due to arbitrageurs not willing to take the risk with lower amounts. If you really
+                want to dump, {"you'll"} have to set a very low custom price in advanced settings.
+              </div>
+            </div>
+          )}
+          {warning === 'MAX_AMOUNT' && (
+            <div className={'bg-orange p-5 rounded-md flex flex-col justify-center items-center'}>
+              <div>
+                <ExclamationTriangleIcon className={'w-20'} />
+              </div>
+              <div className={'text-center'}>
+                We are currently not aware of any arbitrageurs willing to take on swaps over{' '}
+                {config.WARN_LIQUIDITY_MAX_AMOUNT_MATCH_IN_DOLLARS} USD. Your swap might fail.
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       <div className={'bg-brown-orange rounded-lg p-5'}>
         <p className={'text-gray text-sm'}>
@@ -358,8 +412,10 @@ export function DumpForm() {
           <span className={!isSwapEnabled ? 'text-gray' : ''}>
             I understand and accept the{' '}
             {/*{the link doesn't work when in dev mode, but works when the nextjs page is exported}*/}
-            <Link href={'/terms_and_conditions.html'}  passHref>
-              <a className={'underline'} target={'_blank'} rel="noreferrer">Terms & Conditions</a>
+            <Link href={'/terms_and_conditions.html'} passHref>
+              <a className={'underline'} target={'_blank'} rel="noreferrer">
+                Terms & Conditions
+              </a>
             </Link>
           </span>
         </label>
@@ -367,7 +423,7 @@ export function DumpForm() {
 
       <div className="flex flex-row gap-x-2 w-full">
         <Button buttonType={error ? 'disabled' : 'primary'} disabled={!!error} onClick={handleClickCommit} fullWidth>
-          {error ? errorsTranslations[error] : 'Dump now!'}
+          {error ? errorsTranslations[error] || error : 'Dump now!'}
         </Button>
       </div>
     </>
