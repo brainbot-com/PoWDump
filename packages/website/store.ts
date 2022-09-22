@@ -52,6 +52,8 @@ type Store = {
   resetSwapSettings: () => void
   priceFromAPI: number
   setPriceFromAPI: (newPriceFromAPI: number) => void
+  ethPriceFromAPI: number
+  setEthPriceFromAPI: (newPriceFromAPI: number) => void
   userPrice: string
   setUserPrice: (newUserPrice: string) => void
   form: FormType
@@ -117,6 +119,9 @@ export const useStore = create<Store>()(
         priceFromAPI: 0,
         setPriceFromAPI: (newPriceFromAPI) =>
           set({ priceFromAPI: newPriceFromAPI }, false, { type: 'setPriceFromAPI' }),
+        ethPriceFromAPI: 0,
+        setEthPriceFromAPI: (newPriceFromAPI) =>
+          set({ ethPriceFromAPI: newPriceFromAPI }, false, { type: 'setEthPriceFromAPI' }),
         userPrice: '',
         setUserPrice: (newPrice) => set({ userPrice: newPrice }, false, { type: 'setUserPrice' }),
 

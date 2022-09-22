@@ -7,6 +7,9 @@ const priceFeedCurrencyIds = process.env.NEXT_PUBLIC_PRICE_CURRENCY_IDS || ''
 const enforceSwapsOnChains = process.env.NEXT_PUBLIC_ENFORCE_SWAP_ON_CHAINS
     ? process.env.NEXT_PUBLIC_ENFORCE_SWAP_ON_CHAINS.split(',').map(Number)
     : []
+const priceFeedEthereum = process.env.NEXT_PUBLIC_PRICE_FEED_ETHEREUM_API_URL || ''
+const warnLiquidityMinAmountMatch = process.env.NEXT_PUBLIC_WARN_LIQUIDITY_MIN_AMOUNT_MATCH_IN_DOLLARS || ''
+const warnLiquidityMaxAmountMatch = process.env.NEXT_PUBLIC_WARN_LIQUIDITY_MAX_AMOUNT_MATCH_IN_DOLLARS || ''
 
 const getObjectOutOfConfigString = (configString: string): { [key: string]: string } => {
     return configString
@@ -59,6 +62,9 @@ if (priceFeedCurrencyIds.length === 0 || isMissingValuesForAllPoWChains(priceFee
   throw new Error('NEXT_PUBLIC_PRICE_CURRENCY_ID must be a defined environment variable')
 }
 
+if(priceFeedEthereum.length === 0) {
+    throw new Error('NEXT_PUBLIC_PRICE_FEED_ETHEREUM_API_URL must be a defined environment variable')
+}
 
 export const config: {
   ETH_POS_CONTRACT_ADDRESS: string
@@ -70,6 +76,9 @@ export const config: {
   DUMP_DISCOUNT: number
   PRICE_FEED_API_URLS: { [chainId: string]: string }
   PRICE_CURRENCY_IDS: { [chainId: string]: string }
+  PRICE_FEED_ETHEREUM_API_URL: string
+  WARN_LIQUIDITY_MIN_AMOUNT_MATCH_IN_DOLLARS: number | null
+  WARN_LIQUIDITY_MAX_AMOUNT_MATCH_IN_DOLLARS: number | null
   ENFORCE_SWAP_ON_CHAINS: Array<number>
   POS_CHAIN_ID: number
   NETWORK_IDS_FOR_DROPDOWN: Array<number>
@@ -85,6 +94,9 @@ export const config: {
     : 0,
   PRICE_FEED_API_URLS: getObjectOutOfConfigString(priceFeedUrls),
   PRICE_CURRENCY_IDS: getObjectOutOfConfigString(priceFeedCurrencyIds),
+  PRICE_FEED_ETHEREUM_API_URL: priceFeedEthereum,
+  WARN_LIQUIDITY_MIN_AMOUNT_MATCH_IN_DOLLARS: warnLiquidityMinAmountMatch ? Number(warnLiquidityMinAmountMatch) : null,
+  WARN_LIQUIDITY_MAX_AMOUNT_MATCH_IN_DOLLARS: warnLiquidityMaxAmountMatch ? Number(warnLiquidityMaxAmountMatch) : null,
   ENFORCE_SWAP_ON_CHAINS: enforceSwapsOnChains,
   POS_CHAIN_ID: process.env.NEXT_PUBLIC_POS_CHAIN_ID ? Number(process.env.NEXT_PUBLIC_POS_CHAIN_ID) : 1,
   NETWORK_IDS_FOR_DROPDOWN: process.env.NEXT_PUBLIC_NETWORK_IDS_FOR_DROPDOWN

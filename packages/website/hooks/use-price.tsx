@@ -16,6 +16,15 @@ const fetchPrice = (chainId: number) => {
       return data[config.PRICE_CURRENCY_IDS[chainId]].eth
     })
 }
+
+const fetchEthPrice = () => {
+  return fetch(config.PRICE_FEED_ETHEREUM_API_URL)
+    .then(res => res.json())
+    .then(data => {
+      return data["ethereum"].usd
+    })
+}
+
 let didFetchPrice: { [chainId: number]: boolean } = {}
 
 export function usePrice() {
@@ -23,12 +32,14 @@ export function usePrice() {
   const setPriceFromAPI = useStore(state => state.setPriceFromAPI)
   const suggestedPrice = useStore(state => state.suggestedPrice)
   const setSuggestedPrice = useStore(state => state.setSuggestedPrice)
+  const setEthPriceFromAPI = useStore(state => state.setEthPriceFromAPI)
   const { chainId } = useWeb3React()
   const [fetching, setIsFetching] = useState(false)
 
-  const setAllPrices = (price: number) => {
+  const setAllPrices = async (price: number) => {
     setPriceFromAPI(price)
     setSuggestedPrice(price - (price * config.DUMP_DISCOUNT) / 100)
+    setEthPriceFromAPI(await fetchEthPrice())
 
     setTimeout(() => {
       setIsFetching(false)
@@ -39,8 +50,8 @@ export function usePrice() {
     if (chainId && !didFetchPrice[chainId]) {
       didFetchPrice[chainId] = true
       setIsFetching(true)
-      fetchPrice(chainId).then(price => {
-        setAllPrices(price)
+      fetchPrice(chainId).then(async  price => {
+        await setAllPrices(price)
       })
     }
   }, [chainId])
@@ -48,8 +59,8 @@ export function usePrice() {
   useInterval(() => {
     if (!chainId) return
     setIsFetching(true)
-    fetchPrice(chainId).then(price => {
-      setAllPrices(price)
+    fetchPrice(chainId).then(async price => {
+      await setAllPrices(price)
     })
   }, 20000)
 
