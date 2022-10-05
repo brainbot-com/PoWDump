@@ -16,6 +16,7 @@ lerna-debug.log
 
 # Contracts files
 /packages/contracts/data
+/packages/contracts/deployments/
 
 # Subgraph files
 /packages/subgraph/data
