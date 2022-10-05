@@ -14,11 +14,17 @@ services:
       postgres_pass: let-me-in
       postgres_db: graph-node
       ipfs: 'ipfs:5001'
-      ethereum: "pos:http://node-pos:8545 pow:http://node-pow:8545"
+      ethereum: "pow:${POW_ETHURL} pos:${POS_ETHURL}"
       GRAPH_LOG: info
+      # can be "index-node", "query-node" or "combined-node"
+      node_role: "${GRAPH_NODE_ROLE}"
+      node_id: "${GRAPH_NODE_ID}"
     labels:
-      caddy: graph.staging.powdump.com
+      caddy: localhost
       caddy.reverse_proxy: "{{upstreams 8000}}"
+      caddy.reverse_proxy.header_down_1: +Access-Control-Allow-Methods "GET, POST, PATCH, OPTIONS"
+      caddy.reverse_proxy.header_down_2: +Access-Control-Allow-Headers "Content-Type, Authorization, Time-Zone"
+      caddy.reverse_proxy.header_down_3: +Access-Control-Allow-Credentials "true"
 
   ipfs:
     image: ipfs/kubo:v0.14.0
@@ -28,32 +34,36 @@ services:
   graph-cli:
     profiles: ["tools"]
     build:
-      dockerfile: Dockerfile 
+      dockerfile: Dockerfile
       context: ../..
     entrypoint:
+      #      - bash
       - npx
       - graph
-    working_dir: /usr/app/packages/subgraph
+    working_dir: /usr/app/checkout/packages/subgraph
     volumes:
-      - ./data/deployments:/usr/app/packages/contracts/deployments
-      - ./data/subgraph/build:/usr/app/packages/subgraph/build
-      - ./data/subgraph/generated:/usr/app/packages/subgraph/generated
+      - ../../packages/subgraph:/usr/app/checkout/packages/subgraph
+      - ./data/contracts:/usr/app/checkout/packages/contracts/artifacts
+      - ./data/subgraph/build:/usr/app/checkout/packages/subgraph/build
+      - ./data/subgraph/generated:/usr/app/checkout/packages/subgraph/generated
     environment:
       GRAPH_URL: "http://graph-node:8020"
     depends_on:
       - graph-node
-         
+
   hardhat:
     profiles: ["tools"]
     build:
-      dockerfile: Dockerfile 
-      context: ..
-    working_dir: /usr/app/packages/contracts
+      dockerfile: Dockerfile
+      context: ../..
+    working_dir: /usr/app/checkout/packages/contracts
     entrypoint:
       - npx
       - hardhat
     volumes:
-      - ./data/deployments:/usr/app/packages/contracts/deployments
+      - ./data/contracts:/usr/app/checkout/packages/contracts/artifacts
+      - ./data/deployments:/usr/app/checkout/packages/contracts/deployments
+      - ../../packages/contracts:/usr/app/checkout/packages/contracts
     environment:
       POS_URL: "http://node-pos:8545"
       POW_URL: "http://node-pow:8545"
@@ -69,24 +79,24 @@ services:
       - ./data/ganache/pos:/data/ganache
     command:
       [
-      "--miner.blockTime",
-      "15",
-      "--wallet.mnemonic",
-      "${PRIVKEY_MNEMONIC}",
-      "--wallet.hdPath",
-      "m/44'/60'/0'/0",
-      "--wallet.defaultBalance",
-      "100000",
-      "--database.dbPath=/data/ganache",
-      "--chain.chainId",
-      "4242",
-      "--chain.networkId",
-      "4242",
-      "--server.host",
-      "0.0.0.0"
+        "--miner.blockTime",
+        "15",
+        "--wallet.mnemonic",
+        "${PRIVKEY_MNEMONIC}",
+        "--wallet.hdPath",
+        "m/44'/60'/0'/0",
+        "--wallet.defaultBalance",
+        "100000",
+        "--database.dbPath=/data/ganache",
+        "--chain.chainId",
+        "4242",
+        "--chain.networkId",
+        "4242",
+        "--server.host",
+        "0.0.0.0"
       ]
     labels:
-      caddy: pos.staging.powdump.com
+      caddy: http://localhost:8545
       caddy.reverse_proxy: "{{upstreams 8545}}"
 
   node-pow:
@@ -96,30 +106,31 @@ services:
       - ./data/ganache/pow:/data/ganache
     command:
       [
-      "--miner.blockTime",
-      "18",
-      "--wallet.mnemonic",
-      "${PRIVKEY_MNEMONIC}",
-      "--wallet.hdPath",
-      "m/44'/60'/0'/0",
-      "--wallet.defaultBalance",
-      "100000",
-      "--database.dbPath=/data/ganache",
-      "--chain.chainId",
-      "10011",
-      "--chain.networkId",
-      "10011",
-      "--server.host",
-      "0.0.0.0"
+        "--miner.blockTime",
+        "18",
+        "--wallet.mnemonic",
+        "${PRIVKEY_MNEMONIC}",
+        "--wallet.hdPath",
+        "m/44'/60'/0'/0",
+        "--wallet.defaultBalance",
+        "100000",
+        "--database.dbPath=/data/ganache",
+        "--chain.chainId",
+        "10011",
+        "--chain.networkId",
+        "10011",
+        "--server.host",
+        "0.0.0.0"
       ]
     labels:
-      caddy: pow.staging.powdump.com
+      caddy: http://localhost:8546
       caddy.reverse_proxy: "{{upstreams 8545}}"
+
 
   # TODO the Dockerfile is not building properly yet
   # webapp:
   #   build:
-  #     dockerfile: Dockerfile 
+  #     dockerfile: Dockerfile
   #     context: ../packages/website/
   #   labels:
   #     caddy: staging.powdump.com
@@ -147,6 +158,9 @@ services:
     restart: always
     ports:
       - "80:80"
+      - "8545:8545"
+      - "8546:8546"
+      - "8547:8547"
       - "443:443"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock

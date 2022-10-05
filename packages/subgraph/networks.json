@@ -1,4 +1,14 @@
 {
+  "pow": {
+    "EtherSwap": {
+      "address": "0xee08E5e6643952b3cb22642D2a04A2992141EDDd"
+    }
+  },
+  "pos": {
+    "EtherSwap": {
+      "address": "0xee08E5e6643952b3cb22642D2a04A2992141EDDd"
+    }
+  },
   "etf": {
     "EtherSwap": {
       "address": "0xdC7650c7562E53115eDB02cCC7bf67FB9F79cfF4",

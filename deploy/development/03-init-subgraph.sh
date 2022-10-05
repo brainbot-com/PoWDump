@@ -16,22 +16,25 @@ if [[ -z "${SUBGRAPH_VERSION}" ]]; then
     SUBGRAPH_VERSION="v$(jq -r '.version' <../../packages/subgraph/package.json)"
 fi
 
-# FIXME this is not very flexible when the contract name changes!
-cat data/deployments/pow/EtherSwap.json | jq --argfile a2 data/deployments/pos/EtherSwap.json \
-  '{pow:{EtherSwap:{address:.address}}, pos: {EtherSwap:{address: $a2.address}}}' > data/deployments/graph_networks.json
-
 
 $DC stop graph-cli
 $DC rm -f graph-cli
 
 
-$DC run --no-deps --rm graph-cli codegen
-for network in pos pow; do
+# Compile the contracts to the artifacts dir
+$DC run --no-deps --rm hardhat compile
 
+# Codegen generates AssemblyScript types for smart contract ABIs and the subgraph schema.
+$DC run --no-deps --rm graph-cli codegen --output-dir generated/
+for network in $DEPLOY_NETWORKS; do
+
+  # Build compiles a subgraph to WebAssembly.
   $DC run --no-deps --rm graph-cli build \
     --network $network \
-    --network-file /usr/app/packages/contracts/deployments/graph_networks.json
+    --network-file networks.json \
+    --output-dir build/$SUBGRAPH_VERSION/$network
 
+  # Create registers a subgraph name on the graph node
   $DC run --no-deps --rm graph-cli create --node http://graph-node:8020/ $network --network $network
 
   $DC run --no-deps --rm graph-cli deploy \
@@ -39,8 +42,9 @@ for network in pos pow; do
     --node http://graph-node:8020/ \
     --ipfs http://ipfs:5001 \
     $network --network $network \
-    --network-file /usr/app/packages/contracts/deployments/graph_networks.json
+    --network-file networks.json \
+    --output-dir build/$SUBGRAPH_VERSION/$network
 
 done
 
-$DC stop graph-cli
+$DC stop graph-cli hardhat
