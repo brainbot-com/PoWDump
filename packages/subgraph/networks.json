@@ -23,8 +23,8 @@
   },
   "mainnet": {
     "EtherSwap": {
-      "address": "0xdC8C99452DfCC0eD0574cfaA52f5CB90c8F8131C",
-      "startBlock": 15528396
+      "address": "0x0A09B56233cbff03411c077ebDe915d5e66e4C85",
+      "startBlock": 15677804
     }
   }
 }
