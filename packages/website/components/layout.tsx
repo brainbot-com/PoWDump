@@ -3,6 +3,7 @@ import Head from 'next/head'
 import { NavBar } from './nav-bar'
 import Notification from './notifications/notifications'
 import dynamic from 'next/dynamic'
+import getConfig from 'next/config'
 
 const HowItWorks = dynamic<{}>(() => import('../components/help').then(mod => mod.HowItWorks), {
   ssr: false,
@@ -12,6 +13,7 @@ type Props = {
   children: ReactNode
 }
 export default function Layout({ title, children }: Props) {
+  const { publicRuntimeConfig: {build} } = getConfig()
 
   return (
     <div className={'background-image'}>
@@ -61,6 +63,10 @@ export default function Layout({ title, children }: Props) {
                 <p className={'mt-2'}>
                   <a className={'underline'} href={'https://dump.today/imprint'}>Imprint</a>
                 </p>
+                <p className={'mt-2 text-right text-sm'}>
+                  Build version: {build}
+                </p>
+
               </div>
             </div>
           </div>
