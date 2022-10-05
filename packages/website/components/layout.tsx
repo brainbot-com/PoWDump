@@ -6,6 +6,7 @@ import dynamic from 'next/dynamic'
 import getConfig from 'next/config'
 import Link from 'next/link'
 import React from 'react'
+import { formatAddress } from '../utils/helpers'
 
 const HowItWorks = dynamic<{}>(() => import('../components/help').then(mod => mod.HowItWorks), {
   ssr: false,
@@ -15,7 +16,13 @@ type Props = {
   children: ReactNode
 }
 export default function Layout({ title, children }: Props) {
-  const { publicRuntimeConfig: { build } } = getConfig()
+  let { publicRuntimeConfig: { build } } = getConfig()
+
+  let shortBuildNumber = build
+
+  if(shortBuildNumber.length > 20) {
+    shortBuildNumber = formatAddress(build, 6)
+  }
 
   return (
     <div className={'background-image'}>
@@ -77,7 +84,7 @@ export default function Layout({ title, children }: Props) {
                 </Link>
                 </p>
                 <p className={'mt-2 text-right'}>
-                  Build version: {build}
+                  Build version: <span title={build}>{shortBuildNumber}</span>
                 </p>
 
               </div>
