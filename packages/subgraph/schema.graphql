@@ -1,10 +1,20 @@
 type SwapCommitment @entity {
   id: ID!
+  idAsInt: BigInt!
   hashedSecret: Bytes!
   proof: Bytes!
   initiator: Bytes!
   recipient: Bytes!
+  recipientChangedAt: BigInt!
+  recipientChangedInTransaction: Bytes!
   endTimeStamp: BigInt!
+  createdAt: BigInt!
+  emptiedAt: BigInt!
+  refundedAt: BigInt!
+  createdInTransaction: Bytes!
+  emptiedInTransaction: Bytes!
+  refundedInTransaction: Bytes!
+  contractAddress: Bytes!
   value: BigInt!
   expectedAmount: BigInt!
   emptied: Boolean!
