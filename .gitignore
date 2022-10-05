@@ -25,4 +25,4 @@ lerna-debug.log
 
 # Deployment files
 /deploy/production/data/
-/deploy/staging/data/
+/deploy/development/data/
